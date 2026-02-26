@@ -1,0 +1,628 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    background: #e9eef5;
+    color: #1e293b;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    width: min(1100px, 92%);
+    margin: 0 auto;
+}
+
+.topbar {
+    background: linear-gradient(120deg, #101827, #1f2d45);
+    color: #fff;
+    padding: 14px 0;
+}
+
+.nav-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.brand {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brand img {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 4px;
+}
+
+.brand span {
+    line-height: 1;
+}
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+nav a {
+    color: #c6d2e5;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+nav a:hover {
+    color: #f8fafc;
+}
+
+.page {
+    padding: 24px 0 40px;
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.page > * {
+    width: 100%;
+}
+
+.card {
+    background: #fbfdff;
+    border-radius: 16px;
+    border: 1px solid #d8e2f0;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.1);
+    padding: 20px;
+    margin-bottom: 18px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.vehicle-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 10px;
+    background: #e2e8f0;
+}
+
+.vehicle-meta p {
+    margin: 6px 0;
+    font-size: 14px;
+}
+
+.btn {
+    border: 0;
+    background: #0f766e;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.btn:hover {
+    background: #115e59;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(15, 118, 110, 0.24);
+}
+
+.btn-secondary {
+    background: #2f3f56;
+}
+
+.btn-danger {
+    background: #b91c1c;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #d1dbe8;
+    border-radius: 10px;
+    margin-top: 6px;
+    margin-bottom: 12px;
+    background: #f5f8fc;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.15);
+}
+
+label {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 10px 8px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.status {
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.status-open {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-closed {
+    background: #fef9c3;
+    color: #854d0e;
+}
+
+.status-sold {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.alert {
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.alert-success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.hero {
+    background: linear-gradient(120deg, #1a283f, #165a68);
+    color: #fff;
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 20px;
+}
+
+.hero-title {
+    margin: 0 0 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hero-title img {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.16);
+    padding: 6px;
+}
+
+.ad-banner {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.footer {
+    background: #0f172a;
+    color: #9fb0c9;
+    padding: 16px 0;
+    font-size: 13px;
+    margin-top: auto;
+    text-align: center;
+}
+
+.inline {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.featured-auctions {
+    margin-top: 8px;
+}
+
+.featured-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.featured-heading h2 {
+    margin: 0;
+}
+
+.auction-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+}
+
+.auction-card {
+    padding: 0;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.auction-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px rgba(2, 6, 23, 0.14);
+}
+
+.auction-image-wrap {
+    position: relative;
+}
+
+.auction-image-wrap .vehicle-image {
+    border-radius: 0;
+    height: 200px;
+}
+
+.auction-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(15, 118, 110, 0.95);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    border-radius: 999px;
+    padding: 5px 10px;
+}
+
+.auction-body {
+    padding: 14px 14px 6px;
+}
+
+.auction-body h3 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    line-height: 1.2;
+}
+
+.auction-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.auction-meta span {
+    background: #f1f5f9;
+    color: #334155;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.auction-prices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.auction-prices p {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    margin: 0;
+    padding: 10px;
+}
+
+.auction-prices small {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+    margin-bottom: 4px;
+}
+
+.auction-prices strong {
+    font-size: 15px;
+    color: #0f172a;
+}
+
+.auction-btn {
+    margin: 12px 14px 14px;
+    width: calc(100% - 28px);
+    text-align: center;
+}
+
+@media (max-width: 700px) {
+    .featured-heading {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+.vehicles-page {
+    display: grid;
+    gap: 18px;
+}
+
+.vehicles-toolbar {
+    background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 55%, #ccfbf1 100%);
+    border: 1px solid #dbe3ef;
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.vehicles-toolbar h2 {
+    margin: 0;
+}
+
+.vehicles-toolbar p {
+    margin: 6px 0 0;
+    color: #475569;
+    font-size: 14px;
+}
+
+.vehicles-filter {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.vehicles-filter .btn {
+    border-radius: 999px;
+}
+
+.vehicles-filter .is-active {
+    background: #0f766e;
+}
+
+.vehicles-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+}
+
+.vehicle-card {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #dfe7f3;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vehicle-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.14);
+}
+
+.vehicle-card-media {
+    position: relative;
+}
+
+.vehicle-card-media .vehicle-image {
+    height: 205px;
+    border-radius: 0;
+}
+
+.vehicle-image-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.vehicle-card-media .status {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.vehicle-card-body {
+    padding: 14px;
+}
+
+.vehicle-card-body h3 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    line-height: 1.25;
+}
+
+.vehicle-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.vehicle-tags span {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.vehicle-details-grid {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.vehicle-details-grid p {
+    margin: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    padding: 10px;
+}
+
+.vehicle-details-grid small {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+    margin-bottom: 3px;
+}
+
+.vehicle-details-grid strong {
+    color: #0f172a;
+    font-size: 14px;
+}
+
+.vehicle-card-btn {
+    width: 100%;
+    text-align: center;
+}
+
+.auth-shell,
+.form-shell {
+    display: grid;
+    place-items: center;
+    margin: 8px 0;
+}
+
+.auth-card,
+.form-card {
+    width: min(760px, 100%);
+    background: linear-gradient(180deg, #ffffff 0%, #f4f8fd 100%);
+}
+
+.auth-card h2,
+.form-card h2 {
+    margin-top: 0;
+    margin-bottom: 6px;
+}
+
+.auth-subtitle {
+    margin: 0 0 14px;
+    color: #475569;
+    font-size: 14px;
+}
+
+.auth-btn {
+    margin-top: 2px;
+    width: 100%;
+    padding: 11px 14px;
+}
+
+.auth-links {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.auth-links a,
+.auth-switch a {
+    color: #0f766e;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-links a:hover,
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+.auth-switch {
+    margin: 12px 0 0;
+    color: #475569;
+    font-size: 14px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 14px;
+}
+
+.form-span {
+    grid-column: 1 / -1;
+}
+
+.form-bottom-error {
+    margin-top: -4px;
+    margin-bottom: 0;
+    color: #b91c1c;
+    font-weight: 600;
+}
+
+.auction-countdown {
+    margin: 10px 0 2px;
+    background: #eef4fb;
+    border: 1px solid #d7e1ef;
+    color: #2a425d;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.auction-countdown-inline {
+    display: inline-block;
+    margin-left: 6px;
+    background: #eef4fb;
+    border: 1px solid #d7e1ef;
+    color: #2a425d;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+@media (max-width: 760px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
