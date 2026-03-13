@@ -23,10 +23,10 @@ require ROOT_PATH . '/includes/header.php';
 
 <section class="hero">
     <h1 class="hero-title">
-        <img src="<?php echo BASE_URL; ?>/assets/images/logo.svg" alt="Logo">
-        <span>Online Auction For Seized Bikes & Cars</span>
+        <img src="<?php echo BASE_URL; ?>/assets/images/logo.png" alt="Logo">
+        <span>Online Auction For Bank Seized Bikes & Cars</span>
     </h1>
-    <p>Browse verified seized vehicles, place live bids, and complete secure payment using Razorpay.</p>
+    <p>Browse verified bank seized vehicles, place live bids, and complete secure payment.</p>
     <a class="btn" href="<?php echo BASE_URL; ?>/vehicles.php">Start Bidding</a>
 </section>
 
@@ -38,7 +38,14 @@ require ROOT_PATH . '/includes/header.php';
                 <h3><?php echo esc($ad['title']); ?></h3>
                 <p><?php echo esc($ad['description']); ?></p>
                 <?php if (!empty($ad['image'])): ?>
-                    <img src="<?php echo BASE_URL . '/' . esc($ad['image']); ?>" alt="Ad Banner" class="ad-banner">
+                    <a href="<?php echo BASE_URL . '/' . esc($ad['image']); ?>" target="_blank" rel="noopener noreferrer">
+                        <img
+                            src="<?php echo BASE_URL . '/' . esc($ad['image']); ?>"
+                            alt="Ad Banner"
+                            class="ad-banner"
+                            style="width:100%;height:auto;max-height:none;object-fit:contain;"
+                        >
+                    </a>
                 <?php endif; ?>
             </article>
         <?php endforeach; ?>
@@ -69,10 +76,6 @@ require ROOT_PATH . '/includes/header.php';
                         <p><small>Base Price</small><strong>Rs <?php echo number_format((float)$vehicle['base_price'], 2); ?></strong></p>
                         <p><small>Highest Bid</small><strong>Rs <?php echo number_format((float)$vehicle['highest_bid'], 2); ?></strong></p>
                     </div>
-                    <?php $auctionEndsAt = strtotime((string)$vehicle['created_at'] . ' +8 hours'); ?>
-                    <p class="auction-countdown" data-countdown-end="<?php echo (int)$auctionEndsAt; ?>">
-                        Time Left: --
-                    </p>
                 </div>
                 <a class="btn auction-btn" href="<?php echo BASE_URL; ?>/vehicle.php?id=<?php echo (int)$vehicle['vehicle_id']; ?>">View Details</a>
             </article>

@@ -31,7 +31,7 @@ $pageTitle = 'User Login';
 require ROOT_PATH . '/includes/header.php';
 ?>
 <section class="auth-shell">
-    <div class="auth-card card">
+    <div class="auth-card user-login-card card">
         <h2>User Login</h2>
         <p class="auth-subtitle">Access your account to place bids and track wins.</p>
         <form method="post">
@@ -43,6 +43,9 @@ require ROOT_PATH . '/includes/header.php';
 
             <button class="btn auth-btn" type="submit">Login</button>
         </form>
+        <div class="auth-links">
+            <a href="<?php echo BASE_URL; ?>/forgot_password.php">Forgot Password?</a>
+        </div>
         <p class="auth-switch">New user? <a href="<?php echo BASE_URL; ?>/register.php">Create account</a></p>
     </div>
 </section>

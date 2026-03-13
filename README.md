@@ -1,11 +1,11 @@
-# Online Auction System For Seized Vehicles
+# Online Auction System For Bank Seized Vehicles
 
-PHP + MySQL project for bike/car seized-vehicle auction with Razorpay payment and advertisement module.
+PHP + MySQL project for bike/car bank seized vehicle auction with Razorpay payment and advertisement module.
 
 ## Modules
 
 - User: register, login, browse vehicles, place bids, pay winners via Razorpay, download invoice.
-- Admin: login, add seized vehicles, monitor bids, close auctions, manage ads, verify payments, mark sold.
+- Admin: login, add bank seized vehicles, monitor bids, close auctions, manage ads, verify payments, mark sold.
 
 ## Tech Stack
 
@@ -41,3 +41,14 @@ PHP + MySQL project for bike/car seized-vehicle auction with Razorpay payment an
 - Upload folders:
   - `uploads/vehicles`
   - `uploads/ads`
+## 10.2 Defaulter Details Stored
+
+- Defaulter name
+- Loan account number
+- Bank name
+- Loan amount
+- Pending amount
+- Seizure date
+- Reason for seizure
+
+Each defaulter is linked to one vehicle using a foreign key relationship.

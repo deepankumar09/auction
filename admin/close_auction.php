@@ -33,7 +33,20 @@ if ($highestBid) {
         'final_price' => $highestBid['bid_amount'],
         'vehicle_id' => $vehicleId,
     ]);
-    flash('success', 'Auction closed. Winner selected automatically.');
+
+    $smsSent = false;
+    if (!empty($highestBid['phone'])) {
+        $vehicleName = trim((string)($vehicle['brand'] ?? '') . ' ' . (string)($vehicle['model'] ?? ''));
+        $registrationNo = (string)($vehicle['registration_no'] ?? '');
+        $finalPrice = number_format((float)$highestBid['bid_amount'], 2);
+        $smsMessage = 'Congratulations! You won the auction for ' . $vehicleName . ' (' . $registrationNo . ') at Rs ' . $finalPrice . '. Please complete payment in your account.';
+        $smsSent = sendSmsToPhone((string)$highestBid['phone'], $smsMessage);
+    }
+
+    if (!$smsSent) {
+        error_log('Winner SMS not sent for vehicle_id=' . $vehicleId . ' winner_user_id=' . (int)$highestBid['user_id']);
+    }
+    flash('success', 'Auction closed. Winner selected successfully.');
 } else {
     $stmt = db()->prepare("UPDATE vehicles SET auction_status = 'closed', winner_user_id = NULL, final_price = NULL WHERE vehicle_id = :vehicle_id");
     $stmt->execute(['vehicle_id' => $vehicleId]);

@@ -47,6 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($title === '') {
         flash('error', 'Advertisement title is required.');
+    } elseif (!empty($_FILES['image']['name']) && $image === null) {
+        flash('error', 'Banner image must be JPG/JPEG/PNG/WEBP and between 100KB to 20MB.');
     } else {
         $stmt = db()->prepare('INSERT INTO advertisements (title, description, image, status) VALUES (:title, :description, :image, :status)');
         $stmt->execute([

@@ -23,13 +23,13 @@ $stmt = db()->prepare($sql);
 $stmt->execute($params);
 $vehicles = $stmt->fetchAll();
 
-$pageTitle = 'Seized Vehicles';
+$pageTitle = APP_NAME;
 require ROOT_PATH . '/includes/header.php';
 ?>
 <section class="vehicles-page">
     <section class="vehicles-toolbar">
         <div>
-            <h2>Seized Vehicles</h2>
+            <h2><?php echo esc(APP_NAME); ?></h2>
             <p>Browse all listed bikes and cars available for auction bidding.</p>
         </div>
         <div class="vehicles-filter">

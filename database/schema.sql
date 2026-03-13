@@ -67,6 +67,21 @@ CREATE TABLE IF NOT EXISTS advertisements (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS defaulters (
+    defaulter_id INT AUTO_INCREMENT PRIMARY KEY,
+    vehicle_id INT NOT NULL UNIQUE,
+    defaulter_name VARCHAR(150) NOT NULL,
+    loan_account_number VARCHAR(100) NOT NULL,
+    bank_name VARCHAR(150) NOT NULL,
+    loan_amount DECIMAL(12,2) NOT NULL,
+    pending_amount DECIMAL(12,2) NOT NULL,
+    seizure_date DATE NOT NULL,
+    reason_for_seizure TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(vehicle_id) ON DELETE CASCADE
+);
+
 INSERT INTO admin (username, password)
 SELECT 'admin', '$2y$10$wzgnZZFqhBS4RQEXB12wLuRhAkzs7C7dBCxl.vEFbaj49tXNMWuxe'
 WHERE NOT EXISTS (SELECT 1 FROM admin WHERE username = 'admin');

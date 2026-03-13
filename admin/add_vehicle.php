@@ -20,30 +20,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!in_array($category, ['Bike', 'Car'], true) || $brand === '' || $model === '' || $registrationNo === '' || $year <= 0 || $condition === '' || $basePrice <= 0) {
         flash('error', 'Please fill all vehicle details correctly.');
     } else {
-        $imagePath = handleImageUpload('image', 'vehicles');
+        $imagePath = handleImageUpload('image', 'vehicles', 1024, 20971520);
+        if ($imagePath === null) {
+            flash('error', 'Vehicle image must be JPG/JPEG/PNG/WEBP and between 1KB to 20MB.');
+        } else {
 
-        $sql = 'INSERT INTO vehicles (category, brand, model, registration_no, year, vehicle_condition, base_price, image)
-                VALUES (:category, :brand, :model, :registration_no, :year, :vehicle_condition, :base_price, :image)';
-        try {
-            $stmt = db()->prepare($sql);
-            $stmt->execute([
-                'category' => $category,
-                'brand' => $brand,
-                'model' => $model,
-                'registration_no' => $registrationNo,
-                'year' => $year,
-                'vehicle_condition' => $condition,
-                'base_price' => $basePrice,
-                'image' => $imagePath,
-            ]);
+            $sql = 'INSERT INTO vehicles (category, brand, model, registration_no, year, vehicle_condition, base_price, image)
+                    VALUES (:category, :brand, :model, :registration_no, :year, :vehicle_condition, :base_price, :image)';
+            try {
+                $stmt = db()->prepare($sql);
+                $stmt->execute([
+                    'category' => $category,
+                    'brand' => $brand,
+                    'model' => $model,
+                    'registration_no' => $registrationNo,
+                    'year' => $year,
+                    'vehicle_condition' => $condition,
+                    'base_price' => $basePrice,
+                    'image' => $imagePath,
+                ]);
 
-            flash('success', 'Seized vehicle added successfully.');
-            redirect('admin/vehicles.php');
-        } catch (PDOException $e) {
-            if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'registration_no')) {
-                $bottomError = 'Registration number already exists.';
-            } else {
-                throw $e;
+                flash('success', 'Bank seized vehicle added successfully.');
+                redirect('admin/vehicles.php');
+            } catch (PDOException $e) {
+                if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'registration_no')) {
+                    $bottomError = 'Registration number already exists.';
+                } else {
+                    throw $e;
+                }
             }
         }
     }
@@ -54,7 +58,7 @@ require ROOT_PATH . '/includes/header.php';
 ?>
 <section class="form-shell">
     <div class="card form-card">
-        <h2>Add Seized Vehicle</h2>
+        <h2>Add Bank Seized Vehicle</h2>
         <p class="auth-subtitle">Create a new bike or car auction listing.</p>
         <form method="post" enctype="multipart/form-data" class="form-grid">
             <div>

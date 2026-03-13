@@ -26,6 +26,26 @@ if (!$paidStmt->fetch()) {
 $update = db()->prepare("UPDATE vehicles SET auction_status = 'sold' WHERE vehicle_id = :vehicle_id");
 $update->execute(['vehicle_id' => $vehicleId]);
 
-flash('success', 'Vehicle marked as SOLD.');
+$winnerUserId = (int)($vehicle['winner_user_id'] ?? 0);
+$smsSent = false;
+
+if ($winnerUserId > 0) {
+    $winnerStmt = db()->prepare('SELECT name, phone FROM users WHERE user_id = :user_id LIMIT 1');
+    $winnerStmt->execute(['user_id' => $winnerUserId]);
+    $winner = $winnerStmt->fetch();
+
+    if ($winner && !empty($winner['phone'])) {
+        $vehicleName = trim((string)($vehicle['brand'] ?? '') . ' ' . (string)($vehicle['model'] ?? ''));
+        $registrationNo = (string)($vehicle['registration_no'] ?? '');
+        $smsMessage = 'Congratulations! You won ' . $vehicleName . ' (' . $registrationNo . '). The vehicle is now marked as sold.';
+        $smsSent = sendSmsToPhone((string)$winner['phone'], $smsMessage);
+    }
+}
+
+if ($winnerUserId > 0 && !$smsSent) {
+    flash('success', 'Vehicle marked as SOLD. Winner SMS could not be sent (check SMS settings).');
+} else {
+    flash('success', 'Vehicle marked as SOLD.');
+}
 redirect('admin/payments.php');
 ?>

@@ -10,8 +10,14 @@ requireUserLogin();
 $userId = (int)$_SESSION['user_id'];
 
 $sql = "SELECT v.vehicle_id, v.brand, v.model, v.category, v.registration_no, v.auction_status,
-               v.final_price, p.payment_id, p.payment_status
+               COALESCE(v.final_price, hb.max_bid, v.base_price) AS payable_amount,
+               p.payment_id, p.payment_status
         FROM vehicles v
+        LEFT JOIN (
+            SELECT vehicle_id, MAX(bid_amount) AS max_bid
+            FROM bids
+            GROUP BY vehicle_id
+        ) hb ON hb.vehicle_id = v.vehicle_id
         LEFT JOIN (
             SELECT p1.*
             FROM payments p1
@@ -53,7 +59,7 @@ require ROOT_PATH . '/includes/header.php';
                     <td><?php echo esc($win['brand'] . ' ' . $win['model']); ?></td>
                     <td><?php echo esc($win['category']); ?></td>
                     <td><?php echo esc($win['registration_no']); ?></td>
-                    <td>Rs <?php echo number_format((float)$win['final_price'], 2); ?></td>
+                    <td>Rs <?php echo number_format((float)$win['payable_amount'], 2); ?></td>
                     <td><?php echo strtoupper(esc($win['auction_status'])); ?></td>
                     <td><?php echo strtoupper(esc($win['payment_status'] ?? 'pending')); ?></td>
                     <td>

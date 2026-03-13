@@ -15,7 +15,6 @@ if (!$vehicle) {
 
 $highestBid = getCurrentHighestBid($vehicleId);
 $displayBid = max($highestBid, (float)$vehicle['base_price']);
-$auctionEndsAt = strtotime((string)$vehicle['created_at'] . ' +8 hours');
 
 $bidHistoryStmt = db()->prepare(
     'SELECT b.bid_amount, b.bid_time, u.name
@@ -34,7 +33,7 @@ require ROOT_PATH . '/includes/header.php';
 <section class="card">
     <h2><?php echo esc($vehicle['brand'] . ' ' . $vehicle['model']); ?></h2>
     <?php if (!empty($vehicle['image'])): ?>
-        <img class="vehicle-image" src="<?php echo BASE_URL . '/' . esc($vehicle['image']); ?>" alt="Vehicle">
+        <img class="vehicle-image-detail" src="<?php echo BASE_URL . '/' . esc($vehicle['image']); ?>" alt="Vehicle">
     <?php endif; ?>
 
     <div class="vehicle-meta">
@@ -44,10 +43,6 @@ require ROOT_PATH . '/includes/header.php';
         <p><strong>Condition:</strong> <?php echo esc($vehicle['vehicle_condition']); ?></p>
         <p><strong>Base Price:</strong> Rs <?php echo number_format((float)$vehicle['base_price'], 2); ?></p>
         <p><strong>Current Highest Bid:</strong> Rs <?php echo number_format($displayBid, 2); ?></p>
-        <p>
-            <strong>Remaining Time:</strong>
-            <span class="auction-countdown-inline" data-countdown-end="<?php echo (int)$auctionEndsAt; ?>">--</span>
-        </p>
         <p>
             <strong>Auction Status:</strong>
             <span class="status status-<?php echo esc($vehicle['auction_status']); ?>">

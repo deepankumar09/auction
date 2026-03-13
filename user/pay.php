@@ -10,7 +10,19 @@ requireUserLogin();
 $vehicleId = (int)($_GET['vehicle_id'] ?? 0);
 $userId = (int)$_SESSION['user_id'];
 
-$stmt = db()->prepare('SELECT * FROM vehicles WHERE vehicle_id = :vehicle_id AND winner_user_id = :user_id LIMIT 1');
+$stmt = db()->prepare(
+    'SELECT v.*,
+            COALESCE(v.final_price, hb.max_bid, v.base_price) AS payable_amount
+     FROM vehicles v
+     LEFT JOIN (
+         SELECT vehicle_id, MAX(bid_amount) AS max_bid
+         FROM bids
+         GROUP BY vehicle_id
+     ) hb ON hb.vehicle_id = v.vehicle_id
+     WHERE v.vehicle_id = :vehicle_id
+       AND v.winner_user_id = :user_id
+     LIMIT 1'
+);
 $stmt->execute(['vehicle_id' => $vehicleId, 'user_id' => $userId]);
 $vehicle = $stmt->fetch();
 
@@ -26,7 +38,7 @@ if ($checkPaid->fetch()) {
     redirect('user/my_wins.php');
 }
 
-$amount = (float)($vehicle['final_price'] ?? 0);
+$amount = (float)($vehicle['payable_amount'] ?? 0);
 if ($amount <= 0) {
     flash('error', 'Final price is not set for this vehicle.');
     redirect('user/my_wins.php');
@@ -80,7 +92,7 @@ require ROOT_PATH . '/includes/header.php';
         key: "<?php echo esc(RAZORPAY_KEY_ID); ?>",
         amount: "<?php echo (int)round(((float)$payment['amount']) * 100); ?>",
         currency: "INR",
-        name: "Seized Vehicle Auction",
+        name: "Bank Seized Vehicle Auction",
         description: "Vehicle Auction Payment",
         order_id: "<?php echo esc($payment['razorpay_order_id']); ?>",
         prefill: {

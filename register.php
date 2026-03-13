@@ -12,13 +12,22 @@ if (isUserLoggedIn()) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
-    $phone = trim($_POST['phone'] ?? '');
+    $rawPhone = trim($_POST['phone'] ?? '');
     $password = $_POST['password'] ?? '';
+    $digitsPhone = preg_replace('/\D+/', '', $rawPhone) ?? '';
 
-    if ($name === '' || $email === '' || $phone === '' || $password === '') {
+    if (str_starts_with($digitsPhone, '91') && strlen($digitsPhone) > 10) {
+        $digitsPhone = substr($digitsPhone, -10);
+    }
+
+    $phone = '+91' . $digitsPhone;
+
+    if ($name === '' || $email === '' || $rawPhone === '' || $password === '') {
         flash('error', 'All fields are required.');
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         flash('error', 'Enter a valid email address.');
+    } elseif (!preg_match('/^[6-9][0-9]{9}$/', $digitsPhone)) {
+        flash('error', 'Enter a valid 10-digit Indian mobile number.');
     } else {
         $stmt = db()->prepare('SELECT user_id FROM users WHERE email = :email LIMIT 1');
         $stmt->execute(['email' => $email]);
@@ -46,9 +55,9 @@ $pageTitle = 'User Registration';
 require ROOT_PATH . '/includes/header.php';
 ?>
 <section class="auth-shell">
-    <div class="auth-card card">
+    <div class="auth-card user-register-card card">
         <h2>Create User Account</h2>
-        <p class="auth-subtitle">Register to join seized vehicle auctions.</p>
+        <p class="auth-subtitle">Register to join bank seized vehicle auctions.</p>
         <form method="post" class="form-grid">
             <div>
                 <label for="name">Name</label>
