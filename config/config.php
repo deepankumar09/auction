@@ -11,8 +11,8 @@ define('DB_NAME', 'auction_db');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 
-define('RAZORPAY_KEY_ID', 'rzp_test_your_key_id');
-define('RAZORPAY_KEY_SECRET', 'your_key_secret');
+define('RAZORPAY_KEY_ID', 'rzp_test_SR3G7Tr9cmIW3I');
+define('RAZORPAY_KEY_SECRET', 'O4MNgzyibDBjTSEnKAQBhres');
 
 define('ADMIN_RECOVERY_PHONE', '6383574409');
 define('ADMIN_RECOVERY_EMAIL', 'deepandk1789@gmail.com');

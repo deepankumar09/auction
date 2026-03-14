@@ -43,10 +43,12 @@ $currentPage = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?
                 
             <?php else: ?>
                 <?php if (isUserLoggedIn()): ?>
-                    <a class="<?php echo $currentPage === 'vehicles.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/vehicles.php">Vehicles</a>
-                    <a class="<?php echo $currentPage === 'place_bids.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/place_bids.php">Place Bids</a>
-                    <a class="<?php echo $currentPage === 'my_wins.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/user/my_wins.php">My Wins</a>
-                    <a href="<?php echo BASE_URL; ?>/logout.php?type=user">Logout</a>
+                    <?php if ($currentPage !== 'invoice.php'): ?>
+                        <a class="<?php echo $currentPage === 'vehicles.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/vehicles.php">Vehicles</a>
+                        <a class="<?php echo $currentPage === 'place_bids.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/place_bids.php">Place Bids</a>
+                        <a class="<?php echo $currentPage === 'my_wins.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/user/my_wins.php">My Wins</a>
+                        <a href="<?php echo BASE_URL; ?>/logout.php?type=user">Logout</a>
+                    <?php endif; ?>
                 <?php else: ?>
                     <a class="<?php echo $currentPage === 'index.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/index.php">Home</a>
                     <a class="<?php echo $currentPage === 'vehicles.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/vehicles.php">Vehicles</a>
