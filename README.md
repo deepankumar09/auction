@@ -12,6 +12,7 @@ PHP + MySQL project for bike/car bank seized vehicle auction with Razorpay payme
 - PHP (XAMPP)
 - MySQL
 - HTML/CSS/JavaScript
+- Node.js (for email via Nodemailer)
 - Razorpay Checkout
 
 ## Setup (XAMPP)
@@ -24,7 +25,18 @@ PHP + MySQL project for bike/car bank seized vehicle auction with Razorpay payme
 4. Configure Razorpay keys in `config/config.php`:
    - `RAZORPAY_KEY_ID`
    - `RAZORPAY_KEY_SECRET`
-5. Open in browser:
+5. Install Nodemailer dependency:
+   - Open terminal in `mailer` folder
+   - Run `npm install`
+6. Configure SMTP details in `config/config.php`:
+   - `SMTP_HOST`
+   - `SMTP_PORT`
+   - `SMTP_SECURE`
+   - `SMTP_USER`
+   - `SMTP_PASS`
+   - `SMTP_FROM_EMAIL`
+   - `SMTP_FROM_NAME`
+7. Open in browser:
    - `http://localhost/auction`
 
 ## Default Admin Login

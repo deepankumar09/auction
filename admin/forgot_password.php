@@ -44,12 +44,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $subject = 'Admin Recovery OTP';
         $message = "Your admin recovery OTP is {$otp}. Valid for 5 minutes.";
-        $headers = "From: noreply@localhost\r\nContent-Type: text/plain; charset=UTF-8";
-        $sent = function_exists('mail') ? @mail($email, $subject, $message, $headers) : false;
+        $sent = sendEmailWithNodemailer($email, $subject, $message);
         $contactMasked = maskEmail($email);
 
         if (!$sent) {
-            flash('error', 'OTP could not be sent. Check SMS/Email configuration.');
+            $mailError = strtolower(getLastEmailError());
+            if (str_contains($mailError, '535') || str_contains($mailError, 'badcredentials') || str_contains($mailError, 'username and password not accepted')) {
+                flash('error', 'Gmail rejected SMTP login. Generate a new Gmail App Password and update SMTP_PASS in config/config.php.');
+            } else {
+                flash('error', 'OTP could not be sent. Check email configuration.');
+            }
             redirect('admin/forgot_password.php');
         }
 

@@ -1,0 +1,11 @@
+{
+  "name": "auction-mailer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nodemailer helper for auction PHP app",
+  "main": "send-email.js",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "nodemailer": "^6.9.16"
+  }
+}

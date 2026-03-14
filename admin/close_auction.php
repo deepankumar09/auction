@@ -12,12 +12,12 @@ $vehicle = getVehicleById($vehicleId);
 
 if (!$vehicle) {
     flash('error', 'Vehicle not found.');
-    redirect('admin/vehicles.php');
+    redirect('admin/manage_auction.php');
 }
 
 if ($vehicle['auction_status'] !== 'open') {
     flash('error', 'Auction is already closed.');
-    redirect('admin/vehicles.php');
+    redirect('admin/manage_auction.php');
 }
 
 $highestBid = getHighestBidRow($vehicleId);
@@ -33,25 +33,17 @@ if ($highestBid) {
         'final_price' => $highestBid['bid_amount'],
         'vehicle_id' => $vehicleId,
     ]);
-
-    $smsSent = false;
-    if (!empty($highestBid['phone'])) {
-        $vehicleName = trim((string)($vehicle['brand'] ?? '') . ' ' . (string)($vehicle['model'] ?? ''));
-        $registrationNo = (string)($vehicle['registration_no'] ?? '');
-        $finalPrice = number_format((float)$highestBid['bid_amount'], 2);
-        $smsMessage = 'Congratulations! You won the auction for ' . $vehicleName . ' (' . $registrationNo . ') at Rs ' . $finalPrice . '. Please complete payment in your account.';
-        $smsSent = sendSmsToPhone((string)$highestBid['phone'], $smsMessage);
+    $emailSent = sendWinnerEmailNotification($vehicle, $highestBid);
+    if ($emailSent) {
+        flash('success', 'Auction closed. Winner selected and email sent successfully.');
+    } else {
+        flash('success', 'Auction closed. Winner selected, but email could not be sent.');
     }
-
-    if (!$smsSent) {
-        error_log('Winner SMS not sent for vehicle_id=' . $vehicleId . ' winner_user_id=' . (int)$highestBid['user_id']);
-    }
-    flash('success', 'Auction closed. Winner selected successfully.');
 } else {
     $stmt = db()->prepare("UPDATE vehicles SET auction_status = 'closed', winner_user_id = NULL, final_price = NULL WHERE vehicle_id = :vehicle_id");
     $stmt->execute(['vehicle_id' => $vehicleId]);
     flash('success', 'Auction closed with no bids.');
 }
 
-redirect('admin/vehicles.php');
+redirect('admin/manage_auction.php');
 ?>

@@ -3,6 +3,17 @@ declare(strict_types=1);
 
 require_once ROOT_PATH . '/includes/db.php';
 
+function setLastEmailError(string $message): void
+{
+    $GLOBALS['LAST_EMAIL_ERROR'] = $message;
+}
+
+function getLastEmailError(): string
+{
+    $value = $GLOBALS['LAST_EMAIL_ERROR'] ?? '';
+    return is_string($value) ? $value : '';
+}
+
 function esc(?string $value): string
 {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
@@ -36,6 +47,39 @@ function getHighestBidRow(int $vehicleId): ?array
     $stmt->execute(['vehicle_id' => $vehicleId]);
     $bid = $stmt->fetch();
     return $bid ?: null;
+}
+
+function sendWinnerEmailNotification(array $vehicle, array $highestBid): bool
+{
+    $winnerEmail = trim((string)($highestBid['email'] ?? ''));
+    if (!filter_var($winnerEmail, FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+
+    $winnerName = trim((string)($highestBid['name'] ?? 'Bidder'));
+    $brand = trim((string)($vehicle['brand'] ?? ''));
+    $model = trim((string)($vehicle['model'] ?? ''));
+    $registrationNo = trim((string)($vehicle['registration_no'] ?? ''));
+    $vehicleId = (int)($vehicle['vehicle_id'] ?? 0);
+    $winningBid = (float)($highestBid['bid_amount'] ?? 0);
+    $vehicleLabel = trim($brand . ' ' . $model);
+    if ($vehicleLabel === '') {
+        $vehicleLabel = 'Vehicle';
+    }
+
+    $subject = 'Congratulations! You won an auction on ' . APP_NAME;
+    $message = "Hello {$winnerName},\n\n"
+        . "Congratulations! You are the winning bidder.\n\n"
+        . "Vehicle: {$vehicleLabel}\n"
+        . "Registration No: {$registrationNo}\n"
+        . "Vehicle ID: {$vehicleId}\n"
+        . 'Winning Bid: Rs ' . number_format($winningBid, 2) . "\n\n"
+        . "Please login and complete payment from My Wins page:\n"
+        . BASE_URL . "/user/my_wins.php\n\n"
+        . "Regards,\n"
+        . APP_NAME . " Team";
+
+    return sendEmailWithNodemailer($winnerEmail, $subject, $message);
 }
 
 function autoCloseExpiredAuctions(): void
@@ -75,16 +119,10 @@ function autoCloseExpiredAuctions(): void
                 'final_price' => (float)$highestBid['bid_amount'],
                 'vehicle_id' => $vehicleId,
             ]);
-
-            if (!empty($highestBid['phone'])) {
+            if ($closeStmt->rowCount() > 0) {
                 $vehicle = getVehicleById($vehicleId);
-                $vehicleName = trim((string)($vehicle['brand'] ?? '') . ' ' . (string)($vehicle['model'] ?? ''));
-                $registrationNo = (string)($vehicle['registration_no'] ?? '');
-                $finalPrice = number_format((float)$highestBid['bid_amount'], 2);
-                $smsMessage = 'Congratulations! You won the auction for ' . $vehicleName . ' (' . $registrationNo . ') at Rs ' . $finalPrice . '. Please complete payment in your account.';
-                $smsSent = sendSmsToPhone((string)$highestBid['phone'], $smsMessage);
-                if (!$smsSent) {
-                    error_log('Auto-close winner SMS failed for vehicle_id=' . $vehicleId . ' winner_user_id=' . (int)$highestBid['user_id']);
+                if ($vehicle && !sendWinnerEmailNotification($vehicle, $highestBid)) {
+                    error_log('Winner email could not be sent for vehicle_id=' . $vehicleId . ' winner_user_id=' . (int)$highestBid['user_id']);
                 }
             }
         } else {
@@ -173,77 +211,79 @@ function verifyRazorpaySignature(string $orderId, string $paymentId, string $sig
     return hash_equals($generated, $signature);
 }
 
-function sendSmsToPhone(string $phone, string $message): bool
+function sendEmailWithNodemailer(string $to, string $subject, string $text): bool
 {
-    $apiUrl = (string)(defined('SMS_API_URL') ? SMS_API_URL : '');
-    $apiKey = (string)(defined('SMS_API_KEY') ? SMS_API_KEY : '');
-    $senderId = (string)(defined('SMS_SENDER_ID') ? SMS_SENDER_ID : 'AUCTON');
-    $route = (string)(defined('SMS_ROUTE') ? SMS_ROUTE : 'q');
-    $language = (string)(defined('SMS_LANGUAGE') ? SMS_LANGUAGE : 'english');
+    setLastEmailError('');
+    $nodeBin = (string)(defined('NODE_BIN') ? NODE_BIN : 'node');
+    $scriptPath = ROOT_PATH . '/mailer/send-email.js';
 
-    if ($apiUrl === '' || $apiKey === '' || !function_exists('curl_init')) {
+    if (!is_file($scriptPath)) {
+        $msg = 'Nodemailer script not found at: ' . $scriptPath;
+        error_log($msg);
+        setLastEmailError($msg);
         return false;
     }
 
-    $normalizedPhone = preg_replace('/\D+/', '', $phone) ?? '';
-    if ($normalizedPhone === '') {
-        return false;
+    $smtpPort = (int)(defined('SMTP_PORT') ? SMTP_PORT : 587);
+    $smtpSecureRaw = defined('SMTP_SECURE') ? SMTP_SECURE : false;
+    $smtpSecure = false;
+    if (is_bool($smtpSecureRaw)) {
+        $smtpSecure = $smtpSecureRaw;
+    } elseif (is_numeric($smtpSecureRaw)) {
+        $smtpSecure = ((int)$smtpSecureRaw) === 1;
+    } elseif (is_string($smtpSecureRaw)) {
+        $normalized = strtolower(trim($smtpSecureRaw));
+        $smtpSecure = in_array($normalized, ['1', 'true', 'yes', 'on', 'ssl', 'smtps'], true);
     }
-    if (str_starts_with($normalizedPhone, '91') && strlen($normalizedPhone) > 10) {
-        $normalizedPhone = substr($normalizedPhone, -10);
-    }
-    if (strlen($normalizedPhone) !== 10) {
+    $smtpHost = (string)(defined('SMTP_HOST') ? SMTP_HOST : '');
+    $smtpUser = (string)(defined('SMTP_USER') ? SMTP_USER : '');
+    $smtpPass = (string)(defined('SMTP_PASS') ? SMTP_PASS : '');
+    $fromEmail = (string)(defined('SMTP_FROM_EMAIL') ? SMTP_FROM_EMAIL : $smtpUser);
+    $fromName = (string)(defined('SMTP_FROM_NAME') ? SMTP_FROM_NAME : APP_NAME);
+
+    if ($smtpHost === '' || $smtpUser === '' || $smtpPass === '' || $fromEmail === '') {
+        $msg = 'SMTP settings are incomplete in config/config.php';
+        error_log($msg);
+        setLastEmailError($msg);
         return false;
     }
 
-    $payloadData = [
-        'route' => $route,
-        'message' => $message,
-        'language' => $language,
-        'numbers' => $normalizedPhone,
+    $payload = [
+        'smtp' => [
+            'host' => $smtpHost,
+            'port' => $smtpPort,
+            'secure' => $smtpSecure,
+            'user' => $smtpUser,
+            'pass' => $smtpPass,
+            'fromEmail' => $fromEmail,
+            'fromName' => $fromName,
+        ],
+        'mail' => [
+            'to' => $to,
+            'subject' => $subject,
+            'text' => $text,
+        ],
     ];
 
-    $cleanSender = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $senderId) ?? '', 0, 6));
-    if ($cleanSender !== '' && preg_match('/^[A-Z0-9]{6}$/', $cleanSender)) {
-        $payloadData['sender_id'] = $cleanSender;
-    }
-
-    $payload = http_build_query($payloadData);
-
-    $ch = curl_init($apiUrl);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => $payload,
-        CURLOPT_HTTPHEADER => [
-            'authorization: ' . $apiKey,
-            'Content-Type: application/x-www-form-urlencoded',
-            'Accept: application/json',
-            'Cache-Control: no-cache',
-        ],
-        CURLOPT_TIMEOUT => 15,
-    ]);
-
-    $response = curl_exec($ch);
-    $curlError = curl_error($ch);
-    $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($httpCode < 200 || $httpCode >= 300 || $response === false) {
-        error_log('SMS failed. HTTP: ' . $httpCode . ' CURL: ' . $curlError . ' RESPONSE: ' . (string)$response);
+    $encoded = base64_encode((string)json_encode($payload));
+    if ($encoded === '') {
+        setLastEmailError('Failed to encode email payload.');
         return false;
     }
 
-    $decoded = json_decode((string)$response, true);
-    if (is_array($decoded) && array_key_exists('return', $decoded)) {
-        $ok = (bool)$decoded['return'];
-        if (!$ok) {
-            error_log('SMS API rejected request. RESPONSE: ' . (string)$response);
-        }
-        return $ok;
+    $command = escapeshellarg($nodeBin) . ' ' . escapeshellarg($scriptPath) . ' ' . escapeshellarg($encoded) . ' 2>&1';
+    $output = [];
+    $exitCode = 1;
+    exec($command, $output, $exitCode);
+
+    if ($exitCode !== 0) {
+        $rawOutput = trim(implode(PHP_EOL, $output));
+        $msg = 'Nodemailer send failed. Output: ' . $rawOutput;
+        error_log($msg);
+        setLastEmailError($rawOutput !== '' ? $rawOutput : 'Unknown mail send error.');
+        return false;
     }
 
-    error_log('SMS API unexpected response format. RESPONSE: ' . (string)$response);
     return true;
 }
 ?>

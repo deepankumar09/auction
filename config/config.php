@@ -14,12 +14,16 @@ define('DB_PASS', '');
 define('RAZORPAY_KEY_ID', 'rzp_test_your_key_id');
 define('RAZORPAY_KEY_SECRET', 'your_key_secret');
 
-define('SMS_API_URL', 'https://www.fast2sms.com/dev/bulkV2');
-define('SMS_API_KEY', '8EtsQS7nVb59fecKDuY2qpMHil1axJrXgLW4PN0RUzZokdm6hBox5CKL1bWQskDhJpmqU9XcdaTfjiGz');
-define('SMS_SENDER_ID', 'AUCTON');
-define('SMS_ROUTE', 'q');
-define('SMS_LANGUAGE', 'english');
-
 define('ADMIN_RECOVERY_PHONE', '6383574409');
 define('ADMIN_RECOVERY_EMAIL', 'deepandk1789@gmail.com');
+
+  
+define('NODE_BIN', 'C:\\Program Files\\nodejs\\node.exe');
+define('SMTP_HOST', 'smtp.gmail.com');
+define('SMTP_PORT', 587);
+define('SMTP_SECURE', false);
+define('SMTP_USER', 'deepandk1789@gmail.com');
+define('SMTP_PASS', 'ouwjaxwcyjvpmkav');
+define('SMTP_FROM_EMAIL', 'deepandk1789@gmail.com');
+define('SMTP_FROM_NAME', APP_NAME . ' PHP Project Support');
 ?>
