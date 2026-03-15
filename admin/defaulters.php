@@ -8,36 +8,6 @@ require_once ROOT_PATH . '/includes/functions.php';
 requireAdminLogin();
 $bottomError = '';
 
-function parseVehicleDisplayText(string $vehicleText): ?array
-{
-    if (!preg_match('/^\s*(.+?)\s*\(\s*([^)]+)\s*\)\s*$/', $vehicleText, $matches)) {
-        return null;
-    }
-
-    $namePart = trim((string)$matches[1]);
-    $registrationNo = trim((string)$matches[2]);
-    if ($namePart === '' || $registrationNo === '') {
-        return null;
-    }
-
-    $parts = preg_split('/\s+/', $namePart) ?: [];
-    if (count($parts) < 2) {
-        return null;
-    }
-
-    $model = (string)array_pop($parts);
-    $brand = trim(implode(' ', $parts));
-    if ($brand === '' || $model === '') {
-        return null;
-    }
-
-    return [
-        'brand' => $brand,
-        'model' => $model,
-        'registration_no' => strtoupper($registrationNo),
-    ];
-}
-
 // Keeps old databases compatible when schema.sql has not been re-imported.
 db()->exec(
     "CREATE TABLE IF NOT EXISTS defaulters (
@@ -71,7 +41,6 @@ if (isset($_GET['delete'])) {
 $form = [
     'defaulter_id' => 0,
     'vehicle_id' => 0,
-    'vehicle_text' => '',
     'defaulter_name' => '',
     'loan_account_number' => '',
     'bank_name' => '',
@@ -101,7 +70,6 @@ if ($editId > 0) {
     $form = [
         'defaulter_id' => (int)$editRow['defaulter_id'],
         'vehicle_id' => (int)$editRow['vehicle_id'],
-        'vehicle_text' => trim((string)$editRow['brand'] . ' ' . (string)$editRow['model']) . ' (' . (string)$editRow['registration_no'] . ')',
         'defaulter_name' => (string)$editRow['defaulter_name'],
         'loan_account_number' => (string)$editRow['loan_account_number'],
         'bank_name' => (string)$editRow['bank_name'],
@@ -116,7 +84,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $form = [
         'defaulter_id' => (int)($_POST['defaulter_id'] ?? 0),
         'vehicle_id' => (int)($_POST['vehicle_id'] ?? 0),
-        'vehicle_text' => trim($_POST['vehicle_text'] ?? ''),
         'defaulter_name' => trim($_POST['defaulter_name'] ?? ''),
         'loan_account_number' => trim($_POST['loan_account_number'] ?? ''),
         'bank_name' => trim($_POST['bank_name'] ?? ''),
@@ -131,10 +98,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pendingAmount = (float)$form['pending_amount'];
     $parsedDate = DateTime::createFromFormat('Y-m-d', $form['seizure_date']);
     $isDateValid = $parsedDate && $parsedDate->format('Y-m-d') === $form['seizure_date'];
-    $parsedVehicle = parseVehicleDisplayText($form['vehicle_text']);
+    $vehicleCheckSql = $isEdit
+        ? 'SELECT v.vehicle_id
+           FROM vehicles v
+           LEFT JOIN defaulters d
+             ON d.vehicle_id = v.vehicle_id
+            AND d.defaulter_id <> :defaulter_id
+           WHERE v.vehicle_id = :vehicle_id
+             AND d.vehicle_id IS NULL
+           LIMIT 1'
+        : 'SELECT v.vehicle_id
+           FROM vehicles v
+           LEFT JOIN defaulters d ON d.vehicle_id = v.vehicle_id
+           WHERE v.vehicle_id = :vehicle_id
+             AND d.vehicle_id IS NULL
+           LIMIT 1';
+    $vehicleCheckStmt = db()->prepare($vehicleCheckSql);
+    $vehicleCheckParams = ['vehicle_id' => $form['vehicle_id']];
+    if ($isEdit) {
+        $vehicleCheckParams['defaulter_id'] = $form['defaulter_id'];
+    }
+    $vehicleCheckStmt->execute($vehicleCheckParams);
+    $selectedVehicle = $vehicleCheckStmt->fetch();
 
     if (
-        $parsedVehicle === null ||
+        $selectedVehicle === false ||
         $form['defaulter_name'] === '' ||
         $form['loan_account_number'] === '' ||
         $form['bank_name'] === '' ||
@@ -143,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         !$isDateValid ||
         $form['reason_for_seizure'] === ''
     ) {
-        $bottomError = 'Please enter valid details. Vehicle format: Brand Model (REG NO).';
+        $bottomError = 'Please enter valid details and choose an available vehicle.';
     } elseif ($pendingAmount > $loanAmount) {
         $bottomError = 'Pending amount cannot be greater than loan amount.';
     } else {
@@ -151,23 +139,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db()->beginTransaction();
 
             if ($isEdit) {
-                $updateVehicleStmt = db()->prepare(
-                    'UPDATE vehicles
-                     SET brand = :brand,
-                         model = :model,
-                         registration_no = :registration_no
-                     WHERE vehicle_id = :vehicle_id'
-                );
-                $updateVehicleStmt->execute([
-                    'brand' => $parsedVehicle['brand'],
-                    'model' => $parsedVehicle['model'],
-                    'registration_no' => $parsedVehicle['registration_no'],
-                    'vehicle_id' => $form['vehicle_id'],
-                ]);
-
                 $updateDefaulterStmt = db()->prepare(
                     'UPDATE defaulters
-                     SET defaulter_name = :defaulter_name,
+                     SET vehicle_id = :vehicle_id,
+                         defaulter_name = :defaulter_name,
                          loan_account_number = :loan_account_number,
                          bank_name = :bank_name,
                          loan_amount = :loan_amount,
@@ -177,6 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      WHERE defaulter_id = :defaulter_id'
                 );
                 $updateDefaulterStmt->execute([
+                    'vehicle_id' => $form['vehicle_id'],
                     'defaulter_name' => $form['defaulter_name'],
                     'loan_account_number' => $form['loan_account_number'],
                     'bank_name' => $form['bank_name'],
@@ -187,26 +163,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'defaulter_id' => $form['defaulter_id'],
                 ]);
 
-                flash('success', 'Defaulter and vehicle updated successfully.');
+                flash('success', 'Defaulter record updated successfully.');
             } else {
-                $insertVehicleStmt = db()->prepare(
-                    'INSERT INTO vehicles
-                        (category, brand, model, registration_no, year, vehicle_condition, base_price, image)
-                     VALUES
-                        (:category, :brand, :model, :registration_no, :year, :vehicle_condition, :base_price, NULL)'
-                );
-                $insertVehicleStmt->execute([
-                    'category' => 'Bike',
-                    'brand' => $parsedVehicle['brand'],
-                    'model' => $parsedVehicle['model'],
-                    'registration_no' => $parsedVehicle['registration_no'],
-                    'year' => (int)date('Y'),
-                    'vehicle_condition' => 'Seized',
-                    'base_price' => $pendingAmount > 0 ? $pendingAmount : 1,
-                ]);
-
-                $vehicleId = (int)db()->lastInsertId();
-
                 $insertDefaulterStmt = db()->prepare(
                     'INSERT INTO defaulters
                         (vehicle_id, defaulter_name, loan_account_number, bank_name, loan_amount, pending_amount, seizure_date, reason_for_seizure)
@@ -214,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         (:vehicle_id, :defaulter_name, :loan_account_number, :bank_name, :loan_amount, :pending_amount, :seizure_date, :reason_for_seizure)'
                 );
                 $insertDefaulterStmt->execute([
-                    'vehicle_id' => $vehicleId,
+                    'vehicle_id' => $form['vehicle_id'],
                     'defaulter_name' => $form['defaulter_name'],
                     'loan_account_number' => $form['loan_account_number'],
                     'bank_name' => $form['bank_name'],
@@ -224,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'reason_for_seizure' => $form['reason_for_seizure'],
                 ]);
 
-                flash('success', 'Defaulter and vehicle added successfully.');
+                flash('success', 'Defaulter record added successfully.');
             }
 
             db()->commit();
@@ -234,9 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db()->rollBack();
             }
 
-            if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'registration_no')) {
-                $bottomError = 'Registration number already exists.';
-            } elseif ($e->getCode() === '23000') {
+            if ($e->getCode() === '23000') {
                 $bottomError = 'This vehicle already has a defaulter record.';
             } else {
                 throw $e;
@@ -244,6 +200,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+$availableVehiclesSql = 'SELECT v.vehicle_id, v.brand, v.model, v.registration_no
+                         FROM vehicles v
+                         LEFT JOIN defaulters d
+                           ON d.vehicle_id = v.vehicle_id';
+$availableVehiclesParams = [];
+if ($form['defaulter_id'] > 0) {
+    $availableVehiclesSql .= ' AND d.defaulter_id <> :defaulter_id';
+    $availableVehiclesParams['defaulter_id'] = $form['defaulter_id'];
+}
+$availableVehiclesSql .= ' WHERE d.vehicle_id IS NULL
+                           ORDER BY v.created_at DESC, v.vehicle_id DESC';
+$availableVehiclesStmt = db()->prepare($availableVehiclesSql);
+$availableVehiclesStmt->execute($availableVehiclesParams);
+$availableVehicles = $availableVehiclesStmt->fetchAll();
 
 $defaulters = db()->query(
     'SELECT d.*, v.brand, v.model, v.registration_no
@@ -260,11 +231,17 @@ require ROOT_PATH . '/includes/header.php';
         <h2><?php echo $form['defaulter_id'] > 0 ? 'Edit Defaulter' : 'Add Loan Defaulter'; ?></h2>
         <form method="post" class="form-grid">
             <input type="hidden" name="defaulter_id" value="<?php echo (int)$form['defaulter_id']; ?>">
-            <input type="hidden" name="vehicle_id" value="<?php echo (int)$form['vehicle_id']; ?>">
 
             <div class="form-span">
-                <label for="vehicle_text">Vehicle</label>
-                <input id="vehicle_text" name="vehicle_text" type="text" value="<?php echo esc((string)$form['vehicle_text']); ?>" required>
+                <label for="vehicle_id">Vehicle</label>
+                <select id="vehicle_id" name="vehicle_id" required>
+                    <option value="">Select vehicle</option>
+                    <?php foreach ($availableVehicles as $vehicle): ?>
+                        <option value="<?php echo (int)$vehicle['vehicle_id']; ?>" <?php echo (int)$form['vehicle_id'] === (int)$vehicle['vehicle_id'] ? 'selected' : ''; ?>>
+                            <?php echo esc($vehicle['brand'] . ' ' . $vehicle['model'] . ' (' . $vehicle['registration_no'] . ')'); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
 
             <div>

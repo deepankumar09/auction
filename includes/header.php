@@ -32,8 +32,8 @@ $currentPage = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?
         <nav>
             <?php if ($isAdminArea && isAdminLoggedIn()): ?>
                 <a class="<?php echo $currentPage === 'dashboard.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/admin/dashboard.php">Dashboard</a>
+                <a class="<?php echo $currentPage === 'add_vehicle.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/admin/add_vehicle.php">Add Vehicles</a>
                 <a class="<?php echo $currentPage === 'defaulters.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/admin/defaulters.php">Defaulters</a>
-                <a class="<?php echo $currentPage === 'add_vehicle.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/admin/add_vehicle.php">Add Vehicle</a>
                 <a class="<?php echo $currentPage === 'vehicles.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/admin/vehicles.php">Manage Auction</a>
                 <a class="<?php echo $currentPage === 'manage_bids.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/admin/manage_bids.php">Bids</a>
                 <a class="<?php echo $currentPage === 'ads.php' ? 'is-current' : ''; ?>" href="<?php echo BASE_URL; ?>/admin/ads.php">Advertisements</a>
