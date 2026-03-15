@@ -67,78 +67,86 @@ $ads = db()->query('SELECT * FROM advertisements ORDER BY ad_id DESC')->fetchAll
 $pageTitle = 'Manage Advertisements';
 require ROOT_PATH . '/includes/header.php';
 ?>
-<section class="form-shell">
-    <div class="card form-card">
-        <h2>Add Advertisement Banner</h2>
-        <p class="auth-subtitle">Create and manage homepage promotional banners.</p>
-        <form method="post" enctype="multipart/form-data" class="form-grid">
-            <div class="form-span">
-                <label for="title">Title</label>
-                <input id="title" name="title" type="text" required>
-            </div>
+<section class="ads-page">
+    <section class="form-shell">
+        <div class="card form-card ads-form-card">
+            <h2>Add Advertisement Banner</h2>
+            <p class="auth-subtitle">Create and manage homepage promotional banners.</p>
+            <form method="post" enctype="multipart/form-data" class="form-grid ads-form-grid">
+                <div class="form-span">
+                    <label for="title">Title</label>
+                    <input id="title" name="title" type="text" required>
+                </div>
 
-            <div class="form-span">
-                <label for="description">Description</label>
-                <textarea id="description" name="description" rows="4"></textarea>
-            </div>
+                <div class="form-span">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="4"></textarea>
+                </div>
 
-            <div>
-                <label for="image">Banner Image</label>
-                <input id="image" name="image" type="file" accept=".jpg,.jpeg,.png,.webp">
-            </div>
+                <div>
+                    <label for="image">Banner Image</label>
+                    <input id="image" name="image" type="file" accept=".jpg,.jpeg,.png,.webp">
+                </div>
 
-            <div>
-                <label for="status">Status</label>
-                <select id="status" name="status">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
-            </div>
+                <div>
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
 
-            <button class="btn auth-btn form-span" type="submit">Save Advertisement</button>
-        </form>
-    </div>
-</section>
+                <button class="btn auth-btn form-span" type="submit">Save Advertisement</button>
+            </form>
+        </div>
+    </section>
 
-<section class="card">
-    <h2>Advertisement List</h2>
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>Action</th>
-            <th>Delete</th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php if (!$ads): ?>
-            <tr><td colspan="5">No advertisements yet.</td></tr>
-        <?php else: ?>
-            <?php foreach ($ads as $ad): ?>
+    <section class="card ads-table-card">
+        <h2>Advertisement List</h2>
+        <div class="ads-table-wrap">
+            <table class="ads-table">
+                <thead>
                 <tr>
-                    <td><?php echo (int)$ad['ad_id']; ?></td>
-                    <td><?php echo esc($ad['title']); ?></td>
-                    <td><?php echo strtoupper(esc($ad['status'])); ?></td>
-                    <td><?php echo esc($ad['created_at']); ?></td>
-                    <td>
-                        <div class="inline">
-                            <a class="btn btn-secondary" href="<?php echo BASE_URL; ?>/admin/ads.php?toggle=<?php echo (int)$ad['ad_id']; ?>">
-                                <?php echo $ad['status'] === 'active' ? 'Deactivate' : 'Activate'; ?>
-                            </a>
-                        </div>
-                    </td>
-                    <td>
-                        <a class="btn btn-danger" data-confirm="Delete this advertisement?" href="<?php echo BASE_URL; ?>/admin/ads.php?delete=<?php echo (int)$ad['ad_id']; ?>">
-                            Delete
-                        </a>
-                    </td>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Action</th>
+                    <th>Delete</th>
                 </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
-        </tbody>
-    </table>
+                </thead>
+                <tbody>
+                <?php if (!$ads): ?>
+                    <tr><td colspan="6">No advertisements yet.</td></tr>
+                <?php else: ?>
+                    <?php foreach ($ads as $ad): ?>
+                        <tr>
+                            <td><?php echo (int)$ad['ad_id']; ?></td>
+                            <td><?php echo esc($ad['title']); ?></td>
+                            <td>
+                                <span class="ads-status-badge <?php echo $ad['status'] === 'active' ? 'is-active' : 'is-inactive'; ?>">
+                                    <?php echo strtoupper(esc($ad['status'])); ?>
+                                </span>
+                            </td>
+                            <td><?php echo esc($ad['created_at']); ?></td>
+                            <td>
+                                <div class="inline">
+                                    <a class="btn btn-secondary ads-action-btn" href="<?php echo BASE_URL; ?>/admin/ads.php?toggle=<?php echo (int)$ad['ad_id']; ?>">
+                                        <?php echo $ad['status'] === 'active' ? 'Deactivate' : 'Activate'; ?>
+                                    </a>
+                                </div>
+                            </td>
+                            <td>
+                                <a class="btn btn-danger ads-action-btn" data-confirm="Delete this advertisement?" href="<?php echo BASE_URL; ?>/admin/ads.php?delete=<?php echo (int)$ad['ad_id']; ?>">
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </section>
 </section>
 <?php require ROOT_PATH . '/includes/footer.php'; ?>
