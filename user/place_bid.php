@@ -8,7 +8,7 @@ require_once ROOT_PATH . '/includes/functions.php';
 requireUserLogin();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    redirect('vehicles.php');
+    redirect('place_bids.php');
 }
 
 autoCloseExpiredAuctions();
@@ -28,19 +28,19 @@ if (!$userStmt->fetch()) {
 $vehicle = getVehicleById($vehicleId);
 if (!$vehicle) {
     flash('error', 'Vehicle not found.');
-    redirect('vehicles.php');
+    redirect('place_bids.php');
 }
 
 if ($vehicle['auction_status'] !== 'open') {
     flash('error', 'Auction is closed for this vehicle.');
-    redirect('vehicle.php?id=' . $vehicleId);
+    redirect('place_bids.php?id=' . $vehicleId);
 }
 
 $highest = getCurrentHighestBid($vehicleId);
 $minimumAllowed = max($highest, (float)$vehicle['base_price']);
 if ($bidAmount <= $minimumAllowed) {
     flash('error', 'Bid must be greater than current highest bid.');
-    redirect('vehicle.php?id=' . $vehicleId);
+    redirect('place_bids.php?id=' . $vehicleId);
 }
 
 try {
@@ -56,5 +56,5 @@ try {
 }
 
 flash('success', 'Bid placed successfully.');
-redirect('vehicle.php?id=' . $vehicleId);
+redirect('place_bids.php?id=' . $vehicleId);
 ?>

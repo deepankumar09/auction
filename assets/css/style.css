@@ -191,6 +191,13 @@ nav a.is-current {
     background: #b91c1c;
 }
 
+.btn-disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+}
+
 input,
 select,
 textarea {
@@ -577,6 +584,121 @@ td {
 .vehicle-card-btn {
     width: 100%;
     text-align: center;
+}
+
+.bid-focus-box h3 {
+    margin-top: 0;
+    margin-bottom: 6px;
+}
+
+.bid-focus-subtitle {
+    margin: 0 0 14px;
+    color: #475569;
+    font-size: 14px;
+}
+
+.placebid-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 0.9fr;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.placebid-left,
+.placebid-right {
+    padding: 18px;
+}
+
+.placebid-right {
+    border-left: 1px solid #dbe3ef;
+    background: #f8fafc;
+}
+
+.placebid-title {
+    margin: 0 0 12px;
+    font-size: 26px;
+}
+
+.placebid-image-wrap {
+    border: 1px solid #dbe3ef;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    margin-bottom: 14px;
+}
+
+.placebid-image-wrap .vehicle-image {
+    height: 260px;
+    border-radius: 0;
+}
+
+.placebid-details h4,
+.placebid-right h4 {
+    margin: 0 0 10px;
+    font-size: 19px;
+}
+
+.placebid-details p {
+    margin: 6px 0;
+    font-size: 14px;
+}
+
+.placebid-history {
+    margin-top: 14px;
+}
+
+.placebid-history-list {
+    border: 1px solid #dbe3ef;
+    border-radius: 12px;
+    background: #fff;
+    max-height: 290px;
+    overflow: auto;
+    padding: 8px;
+}
+
+.placebid-history-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid #e6edf7;
+    padding: 10px 8px;
+}
+
+.placebid-history-item:last-child {
+    border-bottom: 0;
+}
+
+.placebid-history-list p {
+    margin: 8px;
+    color: #64748b;
+}
+
+.bid-form-box {
+    margin-top: 0;
+    border: 1px solid #dbe3ef;
+    border-radius: 12px;
+    background: #fff;
+    padding: 12px;
+}
+
+.bid-form-box label {
+    display: block;
+}
+
+.bid-form-box input {
+    margin-bottom: 10px;
+}
+
+@media (max-width: 900px) {
+    .placebid-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .placebid-right {
+        border-left: 0;
+        border-top: 1px solid #dbe3ef;
+    }
 }
 
 .auth-shell,

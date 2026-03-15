@@ -64,7 +64,13 @@ require ROOT_PATH . '/includes/header.php';
                         <p><small>Base Price</small><strong>Rs <?php echo number_format((float)$vehicle['base_price'], 2); ?></strong></p>
                         <p><small>Highest Bid</small><strong>Rs <?php echo number_format((float)$vehicle['highest_bid'], 2); ?></strong></p>
                     </div>
-                    <a class="btn vehicle-card-btn" href="<?php echo BASE_URL; ?>/vehicle.php?id=<?php echo (int)$vehicle['vehicle_id']; ?>">View & Bid</a>
+                    <?php if (($vehicle['auction_status'] ?? '') === 'open'): ?>
+                        <a class="btn vehicle-card-btn" href="<?php echo BASE_URL; ?>/place_bids.php?id=<?php echo (int)$vehicle['vehicle_id']; ?>">View & Bid</a>
+                    <?php else: ?>
+                        <span class="btn vehicle-card-btn btn-disabled">
+                            <?php echo strtoupper(esc($vehicle['auction_status'])); ?> - Bidding Closed
+                        </span>
+                    <?php endif; ?>
                 </div>
             </article>
         <?php endforeach; ?>
