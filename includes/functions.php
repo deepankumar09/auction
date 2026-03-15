@@ -142,7 +142,7 @@ function autoCloseExpiredAuctions(): void
 function handleImageUpload(
     string $inputName,
     string $folder,
-    int $minBytes = 102400,
+    int $minBytes = 10240,
     int $maxBytes = 20971520
 ): ?string
 {

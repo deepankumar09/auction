@@ -330,12 +330,13 @@ require ROOT_PATH . '/includes/header.php';
             <th>Pending</th>
             <th>Seizure Date</th>
             <th>Reason</th>
-            <th>Action</th>
+            <th>Edit</th>
+            <th>Delete</th>
         </tr>
         </thead>
         <tbody>
         <?php if (!$defaulters): ?>
-            <tr><td colspan="10">No defaulter records available.</td></tr>
+            <tr><td colspan="11">No defaulter records available.</td></tr>
         <?php else: ?>
             <?php foreach ($defaulters as $row): ?>
                 <tr>
@@ -349,10 +350,10 @@ require ROOT_PATH . '/includes/header.php';
                     <td><?php echo esc($row['seizure_date']); ?></td>
                     <td><?php echo esc($row['reason_for_seizure']); ?></td>
                     <td>
-                        <div class="inline">
-                            <a class="btn btn-secondary" href="<?php echo BASE_URL; ?>/admin/defaulters.php?edit=<?php echo (int)$row['defaulter_id']; ?>">Edit</a>
-                            <a class="btn btn-danger" data-confirm="Delete this defaulter record?" href="<?php echo BASE_URL; ?>/admin/defaulters.php?delete=<?php echo (int)$row['defaulter_id']; ?>">Delete</a>
-                        </div>
+                        <a class="btn btn-secondary" href="<?php echo BASE_URL; ?>/admin/defaulters.php?edit=<?php echo (int)$row['defaulter_id']; ?>">Edit</a>
+                    </td>
+                    <td>
+                        <a class="btn btn-danger" data-confirm="Delete this defaulter record?" href="<?php echo BASE_URL; ?>/admin/defaulters.php?delete=<?php echo (int)$row['defaulter_id']; ?>">Delete</a>
                     </td>
                 </tr>
             <?php endforeach; ?>

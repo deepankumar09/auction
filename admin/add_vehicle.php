@@ -20,9 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!in_array($category, ['Bike', 'Car'], true) || $brand === '' || $model === '' || $registrationNo === '' || $year <= 0 || $condition === '' || $basePrice <= 0) {
         flash('error', 'Please fill all vehicle details correctly.');
     } else {
-        $imagePath = handleImageUpload('image', 'vehicles', 1024, 20971520);
+        $imagePath = handleImageUpload('image', 'vehicles', 10240, 20971520);
         if ($imagePath === null) {
-            flash('error', 'Vehicle image must be JPG/JPEG/PNG/WEBP and between 1KB to 20MB.');
+            flash('error', 'Vehicle image must be JPG/JPEG/PNG/WEBP and between 10KB to 20MB.');
         } else {
 
             $sql = 'INSERT INTO vehicles (category, brand, model, registration_no, year, vehicle_condition, base_price, image)
