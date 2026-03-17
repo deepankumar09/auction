@@ -10,7 +10,7 @@ if (isAdminLoggedIn()) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
+    $username = trim((string)($_POST['username'] ?? ''));
     $password = $_POST['password'] ?? '';
 
     $stmt = db()->prepare('SELECT * FROM admin WHERE username = :username LIMIT 1');
@@ -34,12 +34,12 @@ require ROOT_PATH . '/includes/header.php';
     <div class="auth-card admin-login-card card">
         <h2>Admin Login</h2>
         <p class="auth-subtitle">Sign in to manage auctions and payments.</p>
-        <form method="post">
+        <form method="post" autocomplete="off">
             <label for="username">Username</label>
-            <input id="username" name="username" type="text" required>
+            <input id="username" name="username" type="text" placeholder="Enter username" autocomplete="off" required>
 
             <label for="password">Password</label>
-            <input id="password" name="password" type="password" required>
+            <input id="password" name="password" type="password" autocomplete="new-password" required>
 
             <button class="btn auth-btn" type="submit">Login</button>
         </form>

@@ -51,6 +51,7 @@ require ROOT_PATH . '/includes/header.php';
             <th>Vehicle</th>
             <th>Type</th>
             <th>Base Price</th>
+            <th>Market Value</th>
             <th>Highest Bid</th>
             <th>Status</th>
             <th>Winner</th>
@@ -65,6 +66,7 @@ require ROOT_PATH . '/includes/header.php';
                 <td><?php echo esc($v['brand'] . ' ' . $v['model']); ?></td>
                 <td><?php echo esc($v['category']); ?></td>
                 <td>Rs <?php echo number_format((float)$v['base_price'], 2); ?></td>
+                <td>Rs <?php echo number_format((float)($v['market_value'] ?? 0), 2); ?></td>
                 <td>Rs <?php echo number_format((float)$v['highest_bid'], 2); ?></td>
                 <td><?php echo strtoupper(esc($v['auction_status'])); ?></td>
                 <td><?php echo esc($v['winner_name'] ?? '-'); ?></td>

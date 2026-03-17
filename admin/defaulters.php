@@ -17,6 +17,7 @@ db()->exec(
         loan_account_number VARCHAR(100) NOT NULL,
         bank_name VARCHAR(150) NOT NULL,
         loan_amount DECIMAL(12,2) NOT NULL,
+        paid_amount DECIMAL(12,2) NOT NULL DEFAULT 0,
         pending_amount DECIMAL(12,2) NOT NULL,
         seizure_date DATE NOT NULL,
         reason_for_seizure TEXT NOT NULL,
@@ -25,6 +26,12 @@ db()->exec(
         FOREIGN KEY (vehicle_id) REFERENCES vehicles(vehicle_id) ON DELETE CASCADE
     )"
 );
+
+// Keeps old databases compatible when paid_amount column does not exist yet.
+$paidAmountColumnStmt = db()->query("SHOW COLUMNS FROM defaulters LIKE 'paid_amount'");
+if (!$paidAmountColumnStmt->fetch()) {
+    db()->exec("ALTER TABLE defaulters ADD COLUMN paid_amount DECIMAL(12,2) NOT NULL DEFAULT 0 AFTER loan_amount");
+}
 
 if (isset($_GET['delete'])) {
     $deleteId = (int)$_GET['delete'];
@@ -41,10 +48,12 @@ if (isset($_GET['delete'])) {
 $form = [
     'defaulter_id' => 0,
     'vehicle_id' => 0,
+    'vehicle_text' => '',
     'defaulter_name' => '',
     'loan_account_number' => '',
     'bank_name' => '',
     'loan_amount' => '',
+    'paid_amount' => '',
     'pending_amount' => '',
     'seizure_date' => '',
     'reason_for_seizure' => '',
@@ -70,10 +79,12 @@ if ($editId > 0) {
     $form = [
         'defaulter_id' => (int)$editRow['defaulter_id'],
         'vehicle_id' => (int)$editRow['vehicle_id'],
+        'vehicle_text' => trim((string)$editRow['brand'] . ' ' . (string)$editRow['model'] . ' ' . (string)$editRow['registration_no']),
         'defaulter_name' => (string)$editRow['defaulter_name'],
         'loan_account_number' => (string)$editRow['loan_account_number'],
         'bank_name' => (string)$editRow['bank_name'],
         'loan_amount' => (string)$editRow['loan_amount'],
+        'paid_amount' => isset($editRow['paid_amount']) ? (string)$editRow['paid_amount'] : '0',
         'pending_amount' => (string)$editRow['pending_amount'],
         'seizure_date' => (string)$editRow['seizure_date'],
         'reason_for_seizure' => (string)$editRow['reason_for_seizure'],
@@ -83,11 +94,13 @@ if ($editId > 0) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $form = [
         'defaulter_id' => (int)($_POST['defaulter_id'] ?? 0),
-        'vehicle_id' => (int)($_POST['vehicle_id'] ?? 0),
+        'vehicle_id' => 0,
+        'vehicle_text' => trim($_POST['vehicle_text'] ?? ''),
         'defaulter_name' => trim($_POST['defaulter_name'] ?? ''),
         'loan_account_number' => trim($_POST['loan_account_number'] ?? ''),
         'bank_name' => trim($_POST['bank_name'] ?? ''),
         'loan_amount' => trim($_POST['loan_amount'] ?? ''),
+        'paid_amount' => trim($_POST['paid_amount'] ?? ''),
         'pending_amount' => trim($_POST['pending_amount'] ?? ''),
         'seizure_date' => trim($_POST['seizure_date'] ?? ''),
         'reason_for_seizure' => trim($_POST['reason_for_seizure'] ?? ''),
@@ -95,45 +108,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $isEdit = $form['defaulter_id'] > 0;
     $loanAmount = (float)$form['loan_amount'];
+    $paidAmount = (float)$form['paid_amount'];
     $pendingAmount = (float)$form['pending_amount'];
     $parsedDate = DateTime::createFromFormat('Y-m-d', $form['seizure_date']);
     $isDateValid = $parsedDate && $parsedDate->format('Y-m-d') === $form['seizure_date'];
+    $normalizedVehicleKey = strtolower((string)preg_replace('/[^a-z0-9]/i', '', $form['vehicle_text']));
     $vehicleCheckSql = $isEdit
         ? 'SELECT v.vehicle_id
            FROM vehicles v
            LEFT JOIN defaulters d
              ON d.vehicle_id = v.vehicle_id
             AND d.defaulter_id <> :defaulter_id
-           WHERE v.vehicle_id = :vehicle_id
+           WHERE (
+                LOWER(REPLACE(REPLACE(REPLACE(REPLACE(CONCAT(v.brand, v.model, v.registration_no), " ", ""), "-", ""), ".", ""), "/", "")) = :vehicle_key
+                OR LOWER(REPLACE(REPLACE(REPLACE(REPLACE(v.registration_no, " ", ""), "-", ""), ".", ""), "/", "")) = :vehicle_key
+                OR :vehicle_key LIKE CONCAT("%", LOWER(REPLACE(REPLACE(REPLACE(REPLACE(v.registration_no, " ", ""), "-", ""), ".", ""), "/", "")), "%")
+            )
              AND d.vehicle_id IS NULL
+           ORDER BY
+             (LOWER(REPLACE(REPLACE(REPLACE(REPLACE(CONCAT(v.brand, v.model, v.registration_no), " ", ""), "-", ""), ".", ""), "/", "")) = :vehicle_key_exact) DESC,
+             (LOWER(REPLACE(REPLACE(REPLACE(REPLACE(v.registration_no, " ", ""), "-", ""), ".", ""), "/", "")) = :vehicle_key_exact) DESC
            LIMIT 1'
         : 'SELECT v.vehicle_id
            FROM vehicles v
            LEFT JOIN defaulters d ON d.vehicle_id = v.vehicle_id
-           WHERE v.vehicle_id = :vehicle_id
+           WHERE (
+                LOWER(REPLACE(REPLACE(REPLACE(REPLACE(CONCAT(v.brand, v.model, v.registration_no), " ", ""), "-", ""), ".", ""), "/", "")) = :vehicle_key
+                OR LOWER(REPLACE(REPLACE(REPLACE(REPLACE(v.registration_no, " ", ""), "-", ""), ".", ""), "/", "")) = :vehicle_key
+                OR :vehicle_key LIKE CONCAT("%", LOWER(REPLACE(REPLACE(REPLACE(REPLACE(v.registration_no, " ", ""), "-", ""), ".", ""), "/", "")), "%")
+            )
              AND d.vehicle_id IS NULL
+           ORDER BY
+             (LOWER(REPLACE(REPLACE(REPLACE(REPLACE(CONCAT(v.brand, v.model, v.registration_no), " ", ""), "-", ""), ".", ""), "/", "")) = :vehicle_key_exact) DESC,
+             (LOWER(REPLACE(REPLACE(REPLACE(REPLACE(v.registration_no, " ", ""), "-", ""), ".", ""), "/", "")) = :vehicle_key_exact) DESC
            LIMIT 1';
     $vehicleCheckStmt = db()->prepare($vehicleCheckSql);
-    $vehicleCheckParams = ['vehicle_id' => $form['vehicle_id']];
+    $vehicleCheckParams = [
+        'vehicle_key' => $normalizedVehicleKey,
+        'vehicle_key_exact' => $normalizedVehicleKey,
+    ];
     if ($isEdit) {
         $vehicleCheckParams['defaulter_id'] = $form['defaulter_id'];
     }
     $vehicleCheckStmt->execute($vehicleCheckParams);
     $selectedVehicle = $vehicleCheckStmt->fetch();
+    $selectedVehicleId = $selectedVehicle ? (int)$selectedVehicle['vehicle_id'] : 0;
 
     if (
         $selectedVehicle === false ||
+        $form['vehicle_text'] === '' ||
         $form['defaulter_name'] === '' ||
         $form['loan_account_number'] === '' ||
         $form['bank_name'] === '' ||
         $loanAmount <= 0 ||
+        $paidAmount < 0 ||
         $pendingAmount < 0 ||
         !$isDateValid ||
         $form['reason_for_seizure'] === ''
     ) {
-        $bottomError = 'Please enter valid details and choose an available vehicle.';
+        $bottomError = 'Vehicle not found. Add vehicle first in Add Vehicles, then add defaulter.';
+    } elseif ($paidAmount > $loanAmount) {
+        $bottomError = 'Paid amount cannot be greater than loan amount.';
     } elseif ($pendingAmount > $loanAmount) {
         $bottomError = 'Pending amount cannot be greater than loan amount.';
+    } elseif (($paidAmount + $pendingAmount) > $loanAmount) {
+        $bottomError = 'Paid amount plus pending amount cannot be greater than loan amount.';
     } else {
         try {
             db()->beginTransaction();
@@ -146,43 +185,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                          loan_account_number = :loan_account_number,
                          bank_name = :bank_name,
                          loan_amount = :loan_amount,
+                         paid_amount = :paid_amount,
                          pending_amount = :pending_amount,
                          seizure_date = :seizure_date,
                          reason_for_seizure = :reason_for_seizure
                      WHERE defaulter_id = :defaulter_id'
                 );
                 $updateDefaulterStmt->execute([
-                    'vehicle_id' => $form['vehicle_id'],
+                    'vehicle_id' => $selectedVehicleId,
                     'defaulter_name' => $form['defaulter_name'],
                     'loan_account_number' => $form['loan_account_number'],
                     'bank_name' => $form['bank_name'],
                     'loan_amount' => $loanAmount,
+                    'paid_amount' => $paidAmount,
                     'pending_amount' => $pendingAmount,
                     'seizure_date' => $form['seizure_date'],
                     'reason_for_seizure' => $form['reason_for_seizure'],
                     'defaulter_id' => $form['defaulter_id'],
                 ]);
 
-                flash('success', 'Defaulter record updated successfully.');
+                flash('success', 'Defaulter updated successfully.');
             } else {
                 $insertDefaulterStmt = db()->prepare(
                     'INSERT INTO defaulters
-                        (vehicle_id, defaulter_name, loan_account_number, bank_name, loan_amount, pending_amount, seizure_date, reason_for_seizure)
+                        (vehicle_id, defaulter_name, loan_account_number, bank_name, loan_amount, paid_amount, pending_amount, seizure_date, reason_for_seizure)
                      VALUES
-                        (:vehicle_id, :defaulter_name, :loan_account_number, :bank_name, :loan_amount, :pending_amount, :seizure_date, :reason_for_seizure)'
+                        (:vehicle_id, :defaulter_name, :loan_account_number, :bank_name, :loan_amount, :paid_amount, :pending_amount, :seizure_date, :reason_for_seizure)'
                 );
                 $insertDefaulterStmt->execute([
-                    'vehicle_id' => $form['vehicle_id'],
+                    'vehicle_id' => $selectedVehicleId,
                     'defaulter_name' => $form['defaulter_name'],
                     'loan_account_number' => $form['loan_account_number'],
                     'bank_name' => $form['bank_name'],
                     'loan_amount' => $loanAmount,
+                    'paid_amount' => $paidAmount,
                     'pending_amount' => $pendingAmount,
                     'seizure_date' => $form['seizure_date'],
                     'reason_for_seizure' => $form['reason_for_seizure'],
                 ]);
 
-                flash('success', 'Defaulter record added successfully.');
+                flash('success', 'Defaulter added successfully.');
             }
 
             db()->commit();
@@ -223,26 +265,21 @@ $defaulters = db()->query(
      ORDER BY d.defaulter_id DESC'
 )->fetchAll();
 
+if ($bottomError !== '') {
+    flash('error', $bottomError);
+}
+
 $pageTitle = 'Defaulter Records';
 require ROOT_PATH . '/includes/header.php';
 ?>
 <section class="form-shell">
     <div class="card form-card">
-        <h2><?php echo $form['defaulter_id'] > 0 ? 'Edit Defaulter' : 'Add Loan Defaulter'; ?></h2>
+        <div class="defaulter-records-head">
+            <h2><?php echo $form['defaulter_id'] > 0 ? 'Edit Defaulter' : 'Add Loan Defaulter'; ?></h2>
+            <a class="btn btn-secondary" href="<?php echo BASE_URL; ?>/admin/defaulter_records.php">View Defaulter Records</a>
+        </div>
         <form method="post" class="form-grid">
             <input type="hidden" name="defaulter_id" value="<?php echo (int)$form['defaulter_id']; ?>">
-
-            <div class="form-span">
-                <label for="vehicle_id">Vehicle</label>
-                <select id="vehicle_id" name="vehicle_id" required>
-                    <option value="">Select vehicle</option>
-                    <?php foreach ($availableVehicles as $vehicle): ?>
-                        <option value="<?php echo (int)$vehicle['vehicle_id']; ?>" <?php echo (int)$form['vehicle_id'] === (int)$vehicle['vehicle_id'] ? 'selected' : ''; ?>>
-                            <?php echo esc($vehicle['brand'] . ' ' . $vehicle['model'] . ' (' . $vehicle['registration_no'] . ')'); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
 
             <div>
                 <label for="defaulter_name">Defaulter Name</label>
@@ -265,11 +302,34 @@ require ROOT_PATH . '/includes/header.php';
             </div>
 
             <div>
+                <label for="paid_amount">Paid Amount</label>
+                <input id="paid_amount" name="paid_amount" type="number" step="0.01" min="0" value="<?php echo esc((string)$form['paid_amount']); ?>" required>
+            </div>
+
+            <div>
                 <label for="pending_amount">Pending Amount</label>
                 <input id="pending_amount" name="pending_amount" type="number" step="0.01" min="0" value="<?php echo esc((string)$form['pending_amount']); ?>" required>
             </div>
 
-            <div>
+            <div class="form-span">
+                <label for="vehicle_text">Vehicle</label>
+                <input
+                    id="vehicle_text"
+                    name="vehicle_text"
+                    type="text"
+                    list="vehicle_text_suggestions"
+                    value="<?php echo esc((string)$form['vehicle_text']); ?>"
+                    required
+                >
+                <datalist id="vehicle_text_suggestions">
+                    <?php foreach ($availableVehicles as $vehicle): ?>
+                        <option value="<?php echo esc($vehicle['brand'] . ' ' . $vehicle['model'] . ' ' . $vehicle['registration_no']); ?>">
+                        </option>
+                    <?php endforeach; ?>
+                </datalist>
+            </div>
+
+            <div class="form-span">
                 <label for="seizure_date">Seizure Date</label>
                 <input id="seizure_date" name="seizure_date" type="date" value="<?php echo esc((string)$form['seizure_date']); ?>" required>
             </div>
@@ -288,54 +348,6 @@ require ROOT_PATH . '/includes/header.php';
             </div>
         </form>
     </div>
-    <?php if ($bottomError !== ''): ?>
-        <p class="form-bottom-error"><?php echo esc($bottomError); ?></p>
-    <?php endif; ?>
 </section>
 
-<section class="card">
-    <h2>Defaulter Records</h2>
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Vehicle</th>
-            <th>Defaulter</th>
-            <th>Loan Account</th>
-            <th>Bank</th>
-            <th>Loan</th>
-            <th>Pending</th>
-            <th>Seizure Date</th>
-            <th>Reason</th>
-            <th>Edit</th>
-            <th>Delete</th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php if (!$defaulters): ?>
-            <tr><td colspan="11">No defaulter records available.</td></tr>
-        <?php else: ?>
-            <?php foreach ($defaulters as $row): ?>
-                <tr>
-                    <td><?php echo (int)$row['defaulter_id']; ?></td>
-                    <td><?php echo esc($row['brand'] . ' ' . $row['model'] . ' (' . $row['registration_no'] . ')'); ?></td>
-                    <td><?php echo esc($row['defaulter_name']); ?></td>
-                    <td><?php echo esc($row['loan_account_number']); ?></td>
-                    <td><?php echo esc($row['bank_name']); ?></td>
-                    <td>Rs <?php echo number_format((float)$row['loan_amount'], 2); ?></td>
-                    <td>Rs <?php echo number_format((float)$row['pending_amount'], 2); ?></td>
-                    <td><?php echo esc($row['seizure_date']); ?></td>
-                    <td><?php echo esc($row['reason_for_seizure']); ?></td>
-                    <td>
-                        <a class="btn btn-secondary" href="<?php echo BASE_URL; ?>/admin/defaulters.php?edit=<?php echo (int)$row['defaulter_id']; ?>">Edit</a>
-                    </td>
-                    <td>
-                        <a class="btn btn-danger" data-confirm="Delete this defaulter record?" href="<?php echo BASE_URL; ?>/admin/defaulters.php?delete=<?php echo (int)$row['defaulter_id']; ?>">Delete</a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
-        </tbody>
-    </table>
-</section>
 <?php require ROOT_PATH . '/includes/footer.php'; ?>

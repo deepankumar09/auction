@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
     year YEAR NOT NULL,
     vehicle_condition VARCHAR(100) NOT NULL,
     base_price DECIMAL(12,2) NOT NULL,
+    market_value DECIMAL(12,2) NOT NULL DEFAULT 0.00,
     image VARCHAR(255) DEFAULT NULL,
     auction_status ENUM('open', 'closed', 'sold') NOT NULL DEFAULT 'open',
     winner_user_id INT DEFAULT NULL,

@@ -34,12 +34,12 @@ require ROOT_PATH . '/includes/header.php';
     <div class="auth-card user-login-card card">
         <h2>User Login</h2>
         <p class="auth-subtitle">Access your account to place bids and track wins.</p>
-        <form method="post">
+        <form method="post" autocomplete="off">
             <label for="email">Email</label>
-            <input id="email" name="email" type="email" required>
+            <input id="email" name="email" type="email" autocomplete="off" required>
 
             <label for="password">Password</label>
-            <input id="password" name="password" type="password" required>
+            <input id="password" name="password" type="password" autocomplete="new-password" required>
 
             <button class="btn auth-btn" type="submit">Login</button>
         </form>

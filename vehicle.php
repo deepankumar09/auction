@@ -42,6 +42,7 @@ require ROOT_PATH . '/includes/header.php';
         <p><strong>Year:</strong> <?php echo esc($vehicle['year']); ?></p>
         <p><strong>Condition:</strong> <?php echo esc($vehicle['vehicle_condition']); ?></p>
         <p><strong>Base Price:</strong> Rs <?php echo number_format((float)$vehicle['base_price'], 2); ?></p>
+        <p><strong>Market Value:</strong> Rs <?php echo number_format((float)($vehicle['market_value'] ?? 0), 2); ?></p>
         <p><strong>Current Highest Bid:</strong> Rs <?php echo number_format($displayBid, 2); ?></p>
         <p>
             <strong>Auction Status:</strong>

@@ -44,3 +44,48 @@ function updateAuctionCountdowns() {
 
 updateAuctionCountdowns();
 setInterval(updateAuctionCountdowns, 1000);
+
+const flashToasts = document.querySelectorAll('[data-flash-toast]');
+flashToasts.forEach((toast) => {
+    const delayMs = 3000;
+    window.setTimeout(() => {
+        toast.classList.add('is-hiding');
+        window.setTimeout(() => {
+            toast.remove();
+        }, 320);
+    }, delayMs);
+});
+
+function initAddVehicleBasePriceAutoCalc() {
+    const marketValueInput = document.getElementById('market_value');
+    const conditionInput = document.getElementById('vehicle_condition');
+    const basePriceInput = document.getElementById('base_price');
+    if (!marketValueInput || !conditionInput || !basePriceInput) {
+        return;
+    }
+
+    const rates = {
+        Good: 0.85,
+        Average: 0.70,
+        Damaged: 0.55,
+    };
+
+    const updateBasePrice = () => {
+        const marketValue = parseFloat(marketValueInput.value || '0');
+        const condition = conditionInput.value || '';
+        const rate = rates[condition];
+
+        if (!rate || marketValue <= 0) {
+            basePriceInput.value = '';
+            return;
+        }
+
+        basePriceInput.value = (marketValue * rate).toFixed(2);
+    };
+
+    marketValueInput.addEventListener('input', updateBasePrice);
+    conditionInput.addEventListener('change', updateBasePrice);
+    updateBasePrice();
+}
+
+initAddVehicleBasePriceAutoCalc();

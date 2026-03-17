@@ -33,9 +33,9 @@ require ROOT_PATH . '/includes/header.php';
             <p>Browse all listed bikes and cars available for auction bidding.</p>
         </div>
         <div class="vehicles-filter">
-            <a class="btn btn-secondary<?php echo $category === '' ? ' is-active' : ''; ?>" href="<?php echo BASE_URL; ?>/vehicles.php">All</a>
-            <a class="btn btn-secondary<?php echo $category === 'Bike' ? ' is-active' : ''; ?>" href="<?php echo BASE_URL; ?>/vehicles.php?category=Bike">Bike</a>
-            <a class="btn btn-secondary<?php echo $category === 'Car' ? ' is-active' : ''; ?>" href="<?php echo BASE_URL; ?>/vehicles.php?category=Car">Car</a>
+            <a class="vehicle-filter-pill<?php echo $category === '' ? ' is-active' : ''; ?>" href="<?php echo BASE_URL; ?>/vehicles.php">All</a>
+            <a class="vehicle-filter-pill<?php echo $category === 'Bike' ? ' is-active' : ''; ?>" href="<?php echo BASE_URL; ?>/vehicles.php?category=Bike">Bike</a>
+            <a class="vehicle-filter-pill<?php echo $category === 'Car' ? ' is-active' : ''; ?>" href="<?php echo BASE_URL; ?>/vehicles.php?category=Car">Car</a>
         </div>
     </section>
 
@@ -62,6 +62,7 @@ require ROOT_PATH . '/includes/header.php';
                     <div class="vehicle-details-grid">
                         <p><small>Registration</small><strong><?php echo esc($vehicle['registration_no']); ?></strong></p>
                         <p><small>Base Price</small><strong>Rs <?php echo number_format((float)$vehicle['base_price'], 2); ?></strong></p>
+                        <p><small>Market Value</small><strong>Rs <?php echo number_format((float)($vehicle['market_value'] ?? 0), 2); ?></strong></p>
                         <p><small>Highest Bid</small><strong>Rs <?php echo number_format((float)$vehicle['highest_bid'], 2); ?></strong></p>
                     </div>
                     <?php if (($vehicle['auction_status'] ?? '') === 'open'): ?>

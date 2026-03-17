@@ -8,6 +8,11 @@ require_once ROOT_PATH . '/includes/functions.php';
 requireAdminLogin();
 $bottomError = '';
 
+$marketValueColumnExists = db()->query("SHOW COLUMNS FROM vehicles LIKE 'market_value'")->fetch();
+if (!$marketValueColumnExists) {
+    db()->exec('ALTER TABLE vehicles ADD COLUMN market_value DECIMAL(12,2) NOT NULL DEFAULT 0.00 AFTER base_price');
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $category = $_POST['category'] ?? '';
     $brand = trim($_POST['brand'] ?? '');
@@ -15,18 +20,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $registrationNo = trim($_POST['registration_no'] ?? '');
     $year = (int)($_POST['year'] ?? 0);
     $condition = trim($_POST['vehicle_condition'] ?? '');
-    $basePrice = (float)($_POST['base_price'] ?? 0);
+    $marketValue = (float)($_POST['market_value'] ?? 0);
+    $conditionRates = [
+        'Good' => 0.85,
+        'Average' => 0.70,
+        'Damaged' => 0.55,
+    ];
 
-    if (!in_array($category, ['Bike', 'Car'], true) || $brand === '' || $model === '' || $registrationNo === '' || $year <= 0 || $condition === '' || $basePrice <= 0) {
+    if (!in_array($category, ['Bike', 'Car'], true) || $brand === '' || $model === '' || $registrationNo === '' || $year <= 0 || !isset($conditionRates[$condition]) || $marketValue <= 0) {
         flash('error', 'Please fill all vehicle details correctly.');
     } else {
+        $basePrice = round($marketValue * $conditionRates[$condition], 2);
         $imagePath = handleImageUpload('image', 'vehicles', 10240, 20971520);
         if ($imagePath === null) {
             flash('error', 'Vehicle image must be JPG/JPEG/PNG/WEBP and between 10KB to 20MB.');
         } else {
 
-            $sql = 'INSERT INTO vehicles (category, brand, model, registration_no, year, vehicle_condition, base_price, image)
-                    VALUES (:category, :brand, :model, :registration_no, :year, :vehicle_condition, :base_price, :image)';
+            $sql = 'INSERT INTO vehicles (category, brand, model, registration_no, year, vehicle_condition, base_price, market_value, image)
+                    VALUES (:category, :brand, :model, :registration_no, :year, :vehicle_condition, :base_price, :market_value, :image)';
             try {
                 $stmt = db()->prepare($sql);
                 $stmt->execute([
@@ -37,10 +48,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'year' => $year,
                     'vehicle_condition' => $condition,
                     'base_price' => $basePrice,
+                    'market_value' => $marketValue,
                     'image' => $imagePath,
                 ]);
 
-                flash('success', 'Bank seized vehicle added successfully.');
+                flash('success', 'Vehicle added successfully.');
                 redirect('admin/vehicles.php');
             } catch (PDOException $e) {
                 if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'registration_no')) {
@@ -86,18 +98,28 @@ require ROOT_PATH . '/includes/header.php';
             </div>
 
             <div>
-                <label for="year">Year</label>
+                <label for="year">Year of Manufacture</label>
                 <input id="year" name="year" type="number" min="1980" max="2099" required>
             </div>
 
             <div>
+                <label for="market_value">Market Value</label>
+                <input id="market_value" name="market_value" type="number" step="0.01" required>
+            </div>
+
+            <div>
                 <label for="vehicle_condition">Condition</label>
-                <input id="vehicle_condition" name="vehicle_condition" type="text" required>
+                <select id="vehicle_condition" name="vehicle_condition" required>
+                    <option value="">Select</option>
+                    <option value="Good">Good</option>
+                    <option value="Average">Average</option>
+                    <option value="Damaged">Damaged</option>
+                </select>
             </div>
 
             <div>
                 <label for="base_price">Base Price</label>
-                <input id="base_price" name="base_price" type="number" step="0.01" required>
+                <input id="base_price" name="base_price" type="number" step="0.01" readonly required>
             </div>
 
             <div>
@@ -105,7 +127,9 @@ require ROOT_PATH . '/includes/header.php';
                 <input id="image" name="image" type="file" accept=".jpg,.jpeg,.png,.webp" required>
             </div>
 
-            <button class="btn auth-btn form-span" type="submit">Add Vehicle</button>
+            <div class="add-vehicle-submit-under-image">
+                <button class="btn add-vehicle-submit-btn" type="submit">Add Vehicle</button>
+            </div>
         </form>
     </div>
     <?php if ($bottomError !== ''): ?>
