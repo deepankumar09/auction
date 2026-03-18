@@ -28,7 +28,7 @@ require ROOT_PATH . '/includes/header.php';
 ?>
 <section class="card admin-dash-hero">
     <div>
-        <h2>Admin Command Center</h2>
+        <h2>Admin Dashboard</h2>
         <p>Monitor auctions, payments, bidding activity, and platform growth in one dashboard.</p>
     </div>
     <div class="admin-dash-quick-actions">

@@ -125,11 +125,11 @@ $pageTitle = 'User Registration';
 require ROOT_PATH . '/includes/header.php';
 ?>
 <section class="auth-shell">
-    <div class="auth-card user-register-card card">
+    <div class="auth-card user-register-card user-register-layout card">
         <h2>Create User Account</h2>
         <p class="auth-subtitle">Register to join bank seized vehicle auctions with email OTP verification.</p>
         <?php if ($isOtpStage): ?>
-            <form method="post" class="form-grid">
+            <form method="post" class="form-grid user-register-form">
                 <div>
                     <label>Name</label>
                     <input type="text" value="<?php echo esc($name); ?>" readonly>
@@ -149,7 +149,7 @@ require ROOT_PATH . '/includes/header.php';
                 <button class="btn auth-btn form-span" type="submit" name="verify_otp">Verify OTP & Register</button>
             </form>
         <?php else: ?>
-            <form method="post" class="form-grid">
+            <form method="post" class="form-grid user-register-form">
                 <div>
                     <label for="name">Name</label>
                     <input id="name" name="name" type="text" value="<?php echo esc($name); ?>" required>

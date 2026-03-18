@@ -1154,8 +1154,157 @@ td {
     width: min(500px, 100%);
 }
 
+.user-login-layout {
+    width: min(500px, 100%);
+    overflow: hidden;
+    padding: 0;
+    border: 1px solid #cfe0f0;
+    background:
+        radial-gradient(circle at top right, rgba(20, 184, 166, 0.16), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.14), transparent 24%),
+        linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.16);
+    position: relative;
+}
+
+.user-login-layout::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 6px;
+    background: linear-gradient(90deg, #0f766e, #0ea5e9, #14b8a6);
+}
+
+.user-login-panel {
+    padding: clamp(24px, 3vw, 36px);
+    display: grid;
+    align-content: center;
+}
+
+.user-login-panel-head {
+    margin-bottom: 20px;
+}
+
+.user-login-panel-head h2 {
+    margin: 0;
+    font-size: clamp(22px, 2.2vw, 30px);
+    color: #0f172a;
+}
+
+.user-login-panel form label {
+    color: #0f172a;
+}
+
+.user-login-panel input {
+    background: #ffffff;
+    border-color: #cbd8e6;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.user-login-panel input::placeholder {
+    color: #94a3b8;
+}
+
+.user-login-panel .auth-btn {
+    margin-top: 8px;
+    padding: 13px 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #0f766e 0%, #0ea5a4 100%);
+    box-shadow: 0 16px 28px rgba(15, 118, 110, 0.2);
+}
+
+.user-login-panel .auth-btn:hover {
+    background: linear-gradient(90deg, #0d6d66 0%, #0f8f8e 100%);
+}
+
 .user-register-card {
     width: min(620px, 100%);
+}
+
+.user-register-layout {
+    width: min(760px, 100%);
+    position: relative;
+    overflow: hidden;
+    padding: clamp(24px, 3.3vw, 34px);
+    border: 1px solid #cad9ea;
+    background:
+        radial-gradient(circle at top right, rgba(20, 184, 166, 0.12), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.1), transparent 24%),
+        linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.13);
+}
+
+.user-register-layout::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 6px;
+    background: linear-gradient(90deg, #0f766e, #0ea5e9, #14b8a6);
+}
+
+.user-register-layout h2 {
+    position: relative;
+    margin-bottom: 8px;
+    font-size: clamp(22px, 2.2vw, 30px);
+    color: #0f172a;
+}
+
+.user-register-layout .auth-subtitle {
+    margin-bottom: 20px;
+    max-width: 54ch;
+    color: #4b5d73;
+    line-height: 1.7;
+}
+
+.user-register-form {
+    gap: 10px 18px;
+}
+
+.user-register-form > div {
+    padding: 14px;
+    border: 1px solid #dbe5f1;
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 250, 255, 0.98) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.user-register-form label {
+    display: block;
+    color: #0f355e;
+    letter-spacing: 0.1px;
+}
+
+.user-register-form input {
+    margin-bottom: 0;
+    background: #ffffff;
+    border-color: #cad7e5;
+}
+
+.user-register-form input[readonly] {
+    color: #475569;
+    background: #f8fbff;
+}
+
+.user-register-layout .auth-btn {
+    margin-top: 8px;
+    padding: 13px 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #0f766e 0%, #0891b2 100%);
+    box-shadow: 0 16px 28px rgba(8, 145, 178, 0.18);
+}
+
+.user-register-layout .auth-btn:hover {
+    background: linear-gradient(90deg, #0d6d66 0%, #0b7f9b 100%);
+}
+
+.user-register-layout .auth-switch {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #dbe5f1;
 }
 
 .auth-card h2,
@@ -1198,6 +1347,22 @@ td {
     margin: 12px 0 0;
     color: #475569;
     font-size: 14px;
+}
+
+.forgot-password-actions {
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.forgot-password-actions .auth-btn {
+    width: 100%;
+}
+
+.forgot-password-secondary-btn {
+    min-width: 180px;
+    text-align: center;
 }
 
 .form-grid {
@@ -1761,7 +1926,7 @@ td {
 
 .defaulter-records-head h2 {
     margin: 0;
-    font-size: clamp(28px, 3vw, 44px);
+    font-size: clamp(22px, 2.2vw, 30px);
 }
 
 .defaulter-records-table-wrap {
@@ -2040,6 +2205,10 @@ td {
 }
 
 @media (max-width: 760px) {
+    .user-login-panel {
+        padding: 22px 18px;
+    }
+
     .form-grid {
         grid-template-columns: 1fr;
     }

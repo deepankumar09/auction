@@ -124,8 +124,10 @@ require ROOT_PATH . '/includes/header.php';
                 <label for="confirm_password">Confirm Password</label>
                 <input id="confirm_password" name="confirm_password" type="password" required>
 
-                <button class="btn auth-btn" type="submit" name="reset_password">Verify OTP & Reset</button>
-                <a class="btn btn-secondary" href="<?php echo BASE_URL; ?>/forgot_password.php?reset_otp=1">Send New OTP</a>
+                <div class="forgot-password-actions">
+                    <button class="btn auth-btn" type="submit" name="reset_password">Verify OTP & Reset</button>
+                    <a class="btn btn-secondary forgot-password-secondary-btn" href="<?php echo BASE_URL; ?>/forgot_password.php?reset_otp=1">Send New OTP</a>
+                </div>
             </form>
         <?php else: ?>
             <form method="post">

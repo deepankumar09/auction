@@ -11,8 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirect('place_bids.php');
 }
 
-autoCloseExpiredAuctions();
-
 $vehicleId = (int)($_POST['vehicle_id'] ?? 0);
 $bidAmount = (float)($_POST['bid_amount'] ?? 0);
 $userId = (int)$_SESSION['user_id'];

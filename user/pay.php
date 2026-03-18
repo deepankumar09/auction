@@ -82,6 +82,7 @@ require ROOT_PATH . '/includes/header.php';
 <section class="card">
     <h2>Razorpay Payment</h2>
     <p><strong>Vehicle:</strong> <?php echo esc($vehicle['brand'] . ' ' . $vehicle['model']); ?></p>
+    <p><strong>Registration No:</strong> <?php echo esc((string)$vehicle['registration_no']); ?></p>
     <p><strong>Amount:</strong> Rs <?php echo number_format((float)$payment['amount'], 2); ?></p>
     <button id="rzp-button" class="btn">Pay Securely</button>
 </section>

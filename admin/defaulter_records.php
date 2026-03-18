@@ -55,7 +55,6 @@ require ROOT_PATH . '/includes/header.php';
 <section class="card defaulter-records-card">
     <div class="defaulter-records-head">
         <h2>Defaulter Records</h2>
-        <a class="btn" href="<?php echo BASE_URL; ?>/admin/defaulters.php">Add Defaulter</a>
     </div>
 
     <div class="defaulter-records-table-wrap">

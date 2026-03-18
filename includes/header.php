@@ -5,8 +5,6 @@ require_once ROOT_PATH . '/config/config.php';
 require_once ROOT_PATH . '/includes/auth.php';
 require_once ROOT_PATH . '/includes/functions.php';
 
-autoCloseExpiredAuctions();
-
 $pageTitle = $pageTitle ?? APP_NAME;
 $isAdminArea = str_contains($_SERVER['PHP_SELF'] ?? '', '/admin/');
 $isAdminLoginPage = str_contains($_SERVER['PHP_SELF'] ?? '', '/admin/login.php');

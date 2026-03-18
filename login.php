@@ -31,22 +31,25 @@ $pageTitle = 'User Login';
 require ROOT_PATH . '/includes/header.php';
 ?>
 <section class="auth-shell">
-    <div class="auth-card user-login-card card">
-        <h2>User Login</h2>
-        <p class="auth-subtitle">Access your account to place bids and track wins.</p>
-        <form method="post" autocomplete="off">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" autocomplete="off" required>
+    <div class="auth-card user-login-card user-login-layout card">
+        <div class="user-login-panel">
+            <div class="user-login-panel-head">
+                <h2>User Login</h2>
+            </div>
+            <form method="post" autocomplete="off">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" autocomplete="off" placeholder="you@example.com" required>
 
-            <label for="password">Password</label>
-            <input id="password" name="password" type="password" autocomplete="new-password" required>
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Enter your password" required>
 
-            <button class="btn auth-btn" type="submit">Login</button>
-        </form>
-        <div class="auth-links">
-            <a href="<?php echo BASE_URL; ?>/forgot_password.php">Forgot Password?</a>
+                <button class="btn auth-btn" type="submit">Login</button>
+            </form>
+            <div class="auth-links">
+                <a href="<?php echo BASE_URL; ?>/forgot_password.php">Forgot Password?</a>
+            </div>
+            <p class="auth-switch">New user? <a href="<?php echo BASE_URL; ?>/register.php">Create account</a></p>
         </div>
-        <p class="auth-switch">New user? <a href="<?php echo BASE_URL; ?>/register.php">Create account</a></p>
     </div>
 </section>
 <?php require ROOT_PATH . '/includes/footer.php'; ?>

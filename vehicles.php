@@ -63,7 +63,7 @@ require ROOT_PATH . '/includes/header.php';
                         <p><small>Registration</small><strong><?php echo esc($vehicle['registration_no']); ?></strong></p>
                         <p><small>Base Price</small><strong>Rs <?php echo number_format((float)$vehicle['base_price'], 2); ?></strong></p>
                         <p><small>Market Value</small><strong>Rs <?php echo number_format((float)($vehicle['market_value'] ?? 0), 2); ?></strong></p>
-                        <p><small>Highest Bid</small><strong>Rs <?php echo number_format((float)$vehicle['highest_bid'], 2); ?></strong></p>
+                        <p><small>Current Bid</small><strong>Rs <?php echo number_format((float)$vehicle['highest_bid'], 2); ?></strong></p>
                     </div>
                     <?php if (($vehicle['auction_status'] ?? '') === 'open'): ?>
                         <a class="btn vehicle-card-btn" href="<?php echo BASE_URL; ?>/place_bids.php?id=<?php echo (int)$vehicle['vehicle_id']; ?>">View & Bid</a>

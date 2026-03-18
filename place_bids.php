@@ -92,7 +92,7 @@ require ROOT_PATH . '/includes/header.php';
                     <p><strong>Year:</strong> <?php echo esc($selectedVehicle['year']); ?></p>
                     <p><strong>Condition:</strong> <?php echo esc($selectedVehicle['vehicle_condition']); ?></p>
                     <p><strong>Base Price:</strong> Rs <?php echo number_format((float)$selectedVehicle['base_price'], 2); ?></p>
-                    <p><strong>Current Highest:</strong> Rs <?php echo number_format((float)$selectedVehicle['highest_bid'], 2); ?></p>
+                    <p><strong>Current Highest Bid:</strong> Rs <?php echo number_format((float)$selectedVehicle['highest_bid'], 2); ?></p>
                 </div>
             </div>
 
@@ -153,7 +153,7 @@ require ROOT_PATH . '/includes/header.php';
                         <div class="vehicle-details-grid">
                             <p><small>Registration</small><strong><?php echo esc($vehicle['registration_no']); ?></strong></p>
                             <p><small>Base Price</small><strong>Rs <?php echo number_format((float)$vehicle['base_price'], 2); ?></strong></p>
-                            <p><small>Current Highest</small><strong>Rs <?php echo number_format((float)$vehicle['highest_bid'], 2); ?></strong></p>
+                            <p><small>Current Highest Bid</small><strong>Rs <?php echo number_format((float)$vehicle['highest_bid'], 2); ?></strong></p>
                         </div>
                         <a class="btn vehicle-card-btn" href="<?php echo BASE_URL; ?>/place_bids.php?id=<?php echo (int)$vehicle['vehicle_id']; ?>">Bid Now</a>
                     </div>

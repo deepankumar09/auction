@@ -275,7 +275,7 @@ require ROOT_PATH . '/includes/header.php';
 <section class="form-shell">
     <div class="card form-card">
         <div class="defaulter-records-head">
-            <h2><?php echo $form['defaulter_id'] > 0 ? 'Edit Defaulter' : 'Add Loan Defaulter'; ?></h2>
+            <h2><?php echo $form['defaulter_id'] > 0 ? 'Edit Loan Defaulter' : 'Add Loan Defaulter'; ?></h2>
             <a class="btn btn-secondary" href="<?php echo BASE_URL; ?>/admin/defaulter_records.php">View Defaulter Records</a>
         </div>
         <form method="post" class="form-grid">
