@@ -92,6 +92,28 @@ require ROOT_PATH . '/includes/header.php';
     </article>
 </section>
 
+<section class="card home-complaints">
+    <div class="home-complaints-head">
+        <div>
+            <h2>Complaints</h2>
+        </div>
+    </div>
+    <div class="home-complaints-grid">
+        <article>
+            <h3>1. Raise Complaint</h3>
+            <p>Users can report wrong bids or payment issues to admin.</p>
+        </article>
+        <article>
+            <h3>2. Admin Review</h3>
+            <p>Admin checks the complaint details and takes action.</p>
+        </article>
+        <article>
+            <h3>3. View Reply</h3>
+            <p>Users can track complaint status and see admin reply.</p>
+        </article>
+    </div>
+</section>
+
 <section class="card home-tips">
     <h2>Quick Bidding Tips</h2>
     <ul>

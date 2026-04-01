@@ -83,6 +83,22 @@ CREATE TABLE IF NOT EXISTS defaulters (
     FOREIGN KEY (vehicle_id) REFERENCES vehicles(vehicle_id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS complaint (
+    complaint_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    bid_id INT DEFAULT NULL,
+    vehicle_id INT DEFAULT NULL,
+    issue_type VARCHAR(50) NOT NULL,
+    description TEXT NOT NULL,
+    admin_reply TEXT DEFAULT NULL,
+    status ENUM('open', 'in_progress', 'resolved') NOT NULL DEFAULT 'open',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (bid_id) REFERENCES bids(bid_id) ON DELETE SET NULL,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(vehicle_id) ON DELETE SET NULL
+);
+
 INSERT INTO admin (username, password)
 SELECT 'admin', '$2y$10$wzgnZZFqhBS4RQEXB12wLuRhAkzs7C7dBCxl.vEFbaj49tXNMWuxe'
 WHERE NOT EXISTS (SELECT 1 FROM admin WHERE username = 'admin');

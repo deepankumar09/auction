@@ -90,6 +90,16 @@ $openAuctionsStmt = db()->prepare(
 $openAuctionsStmt->execute(['user_id' => $userId]);
 $openAuctions = $openAuctionsStmt->fetchAll();
 
+ensureComplaintTable();
+$complaintsCountStmt = db()->prepare(
+    "SELECT COUNT(*)
+     FROM complaint
+     WHERE user_id = :user_id
+       AND status <> 'resolved'"
+);
+$complaintsCountStmt->execute(['user_id' => $userId]);
+$openComplaintsCount = (int)$complaintsCountStmt->fetchColumn();
+
 $pageTitle = 'User Dashboard';
 require ROOT_PATH . '/includes/header.php';
 ?>
@@ -121,6 +131,10 @@ require ROOT_PATH . '/includes/header.php';
     <article class="card user-stat-card">
         <p class="user-stat-label">Total Paid</p>
         <p class="user-stat-value">Rs <?php echo number_format((float)($stats['total_paid'] ?? 0), 2); ?></p>
+    </article>
+    <article class="card user-stat-card">
+        <p class="user-stat-label">Open Complaints</p>
+        <p class="user-stat-value"><?php echo $openComplaintsCount; ?></p>
     </article>
 </section>
 
@@ -201,5 +215,15 @@ require ROOT_PATH . '/includes/header.php';
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
+</section>
+
+<section class="card user-dash-panel">
+    <div class="user-dash-panel-head">
+        <h3>Support Messages</h3>
+        <a href="<?php echo BASE_URL; ?>/user/complaints.php">Open Module</a>
+    </div>
+    <p class="user-dash-empty">
+        Report wrong bids, payment issues, or other problems. Admin replies will appear in your complaint history.
+    </p>
 </section>
 <?php require ROOT_PATH . '/includes/footer.php'; ?>

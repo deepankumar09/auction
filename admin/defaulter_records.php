@@ -52,7 +52,7 @@ $defaulters = db()->query(
 $pageTitle = 'Defaulter Records';
 require ROOT_PATH . '/includes/header.php';
 ?>
-<section class="card defaulter-records-card">
+<section class="card defaulter-records-card defaulter-records-card-wide">
     <div class="defaulter-records-head">
         <h2>Defaulter Records</h2>
     </div>
@@ -61,18 +61,18 @@ require ROOT_PATH . '/includes/header.php';
         <table class="defaulter-records-table">
             <thead>
             <tr>
-                <th>ID</th>
-                <th>Vehicle</th>
-                <th>Defaulter</th>
-                <th>Loan Account</th>
-                <th>Bank</th>
-                <th>Loan</th>
-                <th>Paid</th>
-                <th>Pending</th>
-                <th>Seizure Date</th>
-                <th>Reason</th>
-                <th>Edit</th>
-                <th>Delete</th>
+                <th class="defaulter-col-id">ID</th>
+                <th class="defaulter-col-vehicle">Vehicle</th>
+                <th class="defaulter-col-name">Defaulter</th>
+                <th class="defaulter-col-account">Loan Account</th>
+                <th class="defaulter-col-bank">Bank</th>
+                <th class="defaulter-col-money">Loan</th>
+                <th class="defaulter-col-money">Paid</th>
+                <th class="defaulter-col-money">Pending</th>
+                <th class="defaulter-col-date">Seizure Date</th>
+                <th class="defaulter-col-reason">Reason</th>
+                <th class="defaulter-col-action">Edit</th>
+                <th class="defaulter-col-action">Delete</th>
             </tr>
             </thead>
             <tbody>
@@ -81,20 +81,20 @@ require ROOT_PATH . '/includes/header.php';
             <?php else: ?>
                 <?php foreach ($defaulters as $row): ?>
                     <tr>
-                        <td><?php echo (int)$row['defaulter_id']; ?></td>
-                        <td><?php echo esc($row['brand'] . ' ' . $row['model'] . ' (' . $row['registration_no'] . ')'); ?></td>
-                        <td><?php echo esc($row['defaulter_name']); ?></td>
-                        <td><?php echo esc($row['loan_account_number']); ?></td>
-                        <td><?php echo esc($row['bank_name']); ?></td>
-                        <td>Rs <?php echo number_format((float)$row['loan_amount'], 2); ?></td>
-                        <td>Rs <?php echo number_format((float)($row['paid_amount'] ?? 0), 2); ?></td>
-                        <td>Rs <?php echo number_format((float)$row['pending_amount'], 2); ?></td>
-                        <td><?php echo esc($row['seizure_date']); ?></td>
-                        <td><?php echo esc($row['reason_for_seizure']); ?></td>
-                        <td>
+                        <td class="defaulter-col-id"><?php echo (int)$row['defaulter_id']; ?></td>
+                        <td class="defaulter-col-vehicle"><?php echo esc($row['brand'] . ' ' . $row['model'] . ' (' . $row['registration_no'] . ')'); ?></td>
+                        <td class="defaulter-col-name"><?php echo esc($row['defaulter_name']); ?></td>
+                        <td class="defaulter-col-account"><?php echo esc($row['loan_account_number']); ?></td>
+                        <td class="defaulter-col-bank"><?php echo esc($row['bank_name']); ?></td>
+                        <td class="defaulter-col-money">Rs <?php echo number_format((float)$row['loan_amount'], 2); ?></td>
+                        <td class="defaulter-col-money">Rs <?php echo number_format((float)($row['paid_amount'] ?? 0), 2); ?></td>
+                        <td class="defaulter-col-money">Rs <?php echo number_format((float)$row['pending_amount'], 2); ?></td>
+                        <td class="defaulter-col-date"><?php echo esc($row['seizure_date']); ?></td>
+                        <td class="defaulter-col-reason"><?php echo esc($row['reason_for_seizure']); ?></td>
+                        <td class="defaulter-col-action">
                             <a class="btn btn-secondary defaulter-record-btn" href="<?php echo BASE_URL; ?>/admin/defaulters.php?edit=<?php echo (int)$row['defaulter_id']; ?>">Edit</a>
                         </td>
-                        <td>
+                        <td class="defaulter-col-action">
                             <a class="btn btn-danger defaulter-record-btn" data-confirm="Delete this defaulter record?" href="<?php echo BASE_URL; ?>/admin/defaulter_records.php?delete=<?php echo (int)$row['defaulter_id']; ?>">Delete</a>
                         </td>
                     </tr>

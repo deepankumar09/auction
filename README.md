@@ -6,6 +6,7 @@ PHP + MySQL project for bike/car bank seized vehicle auction with Razorpay payme
 
 - User: register, login, browse vehicles, place bids, pay winners via Razorpay, download invoice.
 - Admin: login, add bank seized vehicles, monitor bids, close auctions, manage ads, verify payments, mark sold.
+- Complaint / Message Module: users can report wrong bids, payment issues, or other problems; admin can review messages, check bid details, reply, and remove incorrect bids.
 
 ## Tech Stack
 
@@ -50,6 +51,8 @@ PHP + MySQL project for bike/car bank seized vehicle auction with Razorpay payme
 - Highest bidder is selected automatically when auction closes.
 - Winner pays from `user/my_wins.php`.
 - Admin verifies paid entries in `admin/payments.php` and marks vehicle as SOLD.
+- Users can submit complaints from `user/complaints.php`.
+- Admin can review and resolve complaints from `admin/complaints.php`.
 - Upload folders:
   - `uploads/vehicles`
   - `uploads/ads`
@@ -64,3 +67,21 @@ PHP + MySQL project for bike/car bank seized vehicle auction with Razorpay payme
 - Reason for seizure
 
 Each defaulter is linked to one vehicle using a foreign key relationship.
+
+## 10. Complaint / Message Module
+
+Purpose:
+Allows users to report issues like wrong bid entry, payment problem, or other auction-related complaints.
+
+Features:
+
+- User Side:
+  - Send message to admin
+  - Select issue type (`Wrong Bid`, `Payment Issue`, `Other`)
+  - Write description
+  - View complaint history and admin reply
+- Admin Side:
+  - View user messages
+  - Check linked bid and vehicle details
+  - Reply to user
+  - Delete wrong bid and mark complaint resolved

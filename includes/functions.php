@@ -27,6 +27,54 @@ function getCurrentHighestBid(int $vehicleId): float
     return (float)($row['highest_bid'] ?? 0);
 }
 
+function ensureComplaintTable(): void
+{
+    static $alreadyEnsured = false;
+    if ($alreadyEnsured) {
+        return;
+    }
+
+    $tableExists = static function (string $tableName): bool {
+        $stmt = db()->prepare('SHOW TABLES LIKE :table_name');
+        $stmt->execute(['table_name' => $tableName]);
+        return (bool)$stmt->fetchColumn();
+    };
+
+    if (!$tableExists('complaint')) {
+        if ($tableExists('complaint_messages')) {
+            db()->exec('RENAME TABLE complaint_messages TO complaint');
+            $alreadyEnsured = true;
+            return;
+        }
+
+        if ($tableExists('complaints')) {
+            db()->exec('RENAME TABLE complaints TO complaint');
+            $alreadyEnsured = true;
+            return;
+        }
+    }
+
+    db()->exec(
+        "CREATE TABLE IF NOT EXISTS complaint (
+            complaint_id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            bid_id INT DEFAULT NULL,
+            vehicle_id INT DEFAULT NULL,
+            issue_type VARCHAR(50) NOT NULL,
+            description TEXT NOT NULL,
+            admin_reply TEXT DEFAULT NULL,
+            status ENUM('open', 'in_progress', 'resolved') NOT NULL DEFAULT 'open',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+            FOREIGN KEY (bid_id) REFERENCES bids(bid_id) ON DELETE SET NULL,
+            FOREIGN KEY (vehicle_id) REFERENCES vehicles(vehicle_id) ON DELETE SET NULL
+        )"
+    );
+
+    $alreadyEnsured = true;
+}
+
 function getVehicleById(int $vehicleId): ?array
 {
     $stmt = db()->prepare('SELECT * FROM vehicles WHERE vehicle_id = :vehicle_id LIMIT 1');

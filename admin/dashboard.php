@@ -6,6 +6,7 @@ require_once ROOT_PATH . '/includes/auth.php';
 require_once ROOT_PATH . '/includes/functions.php';
 
 requireAdminLogin();
+ensureComplaintTable();
 
 $stats = [
     'vehicles' => (int)db()->query('SELECT COUNT(*) FROM vehicles')->fetchColumn(),
@@ -16,6 +17,7 @@ $stats = [
     'paid' => (int)db()->query("SELECT COUNT(*) FROM payments WHERE payment_status = 'paid'")->fetchColumn(),
     'users' => (int)db()->query("SELECT COUNT(*) FROM users WHERE status = 'active'")->fetchColumn(),
     'ads' => (int)db()->query("SELECT COUNT(*) FROM advertisements WHERE status = 'active'")->fetchColumn(),
+    'complaints' => (int)db()->query("SELECT COUNT(*) FROM complaint WHERE status <> 'resolved'")->fetchColumn(),
     'revenue' => (float)db()->query("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE payment_status = 'paid'")->fetchColumn(),
 ];
 $totalVehicles = max((int)$stats['vehicles'], 1);
@@ -63,6 +65,10 @@ require ROOT_PATH . '/includes/header.php';
         <p>Active Ads</p>
         <strong><?php echo (int)$stats['ads']; ?></strong>
     </article>
+    <article class="card admin-dash-stat-card">
+        <p>Open Messages</p>
+        <strong><?php echo (int)$stats['complaints']; ?></strong>
+    </article>
     <article class="card admin-dash-stat-card admin-dash-stat-revenue">
         <p>Revenue Collected</p>
         <strong>Rs <?php echo number_format((float)$stats['revenue'], 2); ?></strong>
@@ -78,6 +84,7 @@ require ROOT_PATH . '/includes/header.php';
             <a href="<?php echo BASE_URL; ?>/admin/payments.php">Check Payments</a>
             <a href="<?php echo BASE_URL; ?>/admin/defaulter_records.php">Defaulter Records</a>
             <a href="<?php echo BASE_URL; ?>/admin/ads.php">Manage Ads</a>
+            <a href="<?php echo BASE_URL; ?>/admin/complaints.php">User Messages</a>
             <a href="<?php echo BASE_URL; ?>/admin/vehicles.php">Control Auctions</a>
         </div>
     </article>

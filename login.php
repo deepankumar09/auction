@@ -6,7 +6,7 @@ require_once ROOT_PATH . '/includes/auth.php';
 require_once ROOT_PATH . '/includes/functions.php';
 
 if (isUserLoggedIn()) {
-    redirect('vehicles.php');
+    redirect('user/dashboard.php');
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['user_id'] = (int)$user['user_id'];
         $_SESSION['user_name'] = $user['name'];
         flash('success', 'Login successful.');
-        redirect('vehicles.php');
+        redirect('user/dashboard.php');
     }
 }
 
@@ -38,7 +38,7 @@ require ROOT_PATH . '/includes/header.php';
             </div>
             <form method="post" autocomplete="off">
                 <label for="email">Email</label>
-                <input id="email" name="email" type="email" autocomplete="off" placeholder="you@example.com" required>
+                <input id="email" name="email" type="email" autocomplete="off" placeholder="you@gmail.com" required>
 
                 <label for="password">Password</label>
                 <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Enter your password" required>

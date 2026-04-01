@@ -31,6 +31,7 @@ if (isset($_GET['delete'])) {
 
 $sql = "SELECT v.*,
                COALESCE(MAX(b.bid_amount), v.base_price) AS highest_bid,
+               COUNT(b.bid_id) AS total_bids,
                u.name AS winner_name
         FROM vehicles v
         LEFT JOIN bids b ON b.vehicle_id = v.vehicle_id
@@ -55,8 +56,9 @@ require ROOT_PATH . '/includes/header.php';
             <th>Highest Bid</th>
             <th>Status</th>
             <th>Winner</th>
-            <th>Action</th>
             <th>Delete</th>
+            <th>Edit</th>
+            <th>Action</th>
         </tr>
         </thead>
         <tbody>
@@ -71,6 +73,16 @@ require ROOT_PATH . '/includes/header.php';
                 <td><?php echo strtoupper(esc($v['auction_status'])); ?></td>
                 <td><?php echo esc($v['winner_name'] ?? '-'); ?></td>
                 <td>
+                    <a class="btn btn-danger" data-confirm="Delete this auction from database?" href="<?php echo BASE_URL; ?>/admin/vehicles.php?delete=<?php echo (int)$v['vehicle_id']; ?>">Delete</a>
+                </td>
+                <td>
+                    <?php if ($v['auction_status'] === 'open'): ?>
+                        <a class="btn" href="<?php echo BASE_URL; ?>/admin/add_vehicle.php?id=<?php echo (int)$v['vehicle_id']; ?>">Edit</a>
+                    <?php else: ?>
+                        <span>-</span>
+                    <?php endif; ?>
+                </td>
+                <td>
                     <div class="inline">
                         <?php if ($v['auction_status'] === 'open'): ?>
                             <a class="btn btn-secondary" data-confirm="Close this auction now?" href="<?php echo BASE_URL; ?>/admin/close_auction.php?id=<?php echo (int)$v['vehicle_id']; ?>">Close Auction</a>
@@ -78,9 +90,6 @@ require ROOT_PATH . '/includes/header.php';
                             <span>Closed</span>
                         <?php endif; ?>
                     </div>
-                </td>
-                <td>
-                    <a class="btn btn-danger" data-confirm="Delete this auction from database?" href="<?php echo BASE_URL; ?>/admin/vehicles.php?delete=<?php echo (int)$v['vehicle_id']; ?>">Delete</a>
                 </td>
             </tr>
         <?php endforeach; ?>
